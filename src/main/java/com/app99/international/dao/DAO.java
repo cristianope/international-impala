@@ -2,6 +2,7 @@ package com.app99.international.dao;
 
 
 public interface DAO {
+
     default String verifyField(String field, String typeName){
         if(typeName.startsWith("character")){
             return "string";

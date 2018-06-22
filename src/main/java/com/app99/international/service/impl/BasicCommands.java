@@ -1,7 +1,7 @@
 package com.app99.international.service.impl;
 
 import com.app99.international.dao.impl.HiveMetastoreDAOImpl;
-import com.app99.international.dao.impl.PostgreSQLDAOImpl;
+import com.app99.international.dao.impl.RedshiftDAOImpl;
 import com.app99.international.model.Field;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +21,7 @@ public abstract class BasicCommands {
     private ImpalaDAOImpl impalaD;
 */
     @Autowired
-    private PostgreSQLDAOImpl redshift;
+    private RedshiftDAOImpl redshift;
 
 
     public HiveMetastoreDAOImpl getCatalog() {
@@ -32,7 +32,7 @@ public abstract class BasicCommands {
         return null; //impalaD;
     }
 */
-    public PostgreSQLDAOImpl getRedshift() {
+    public RedshiftDAOImpl getRedshift() {
         return redshift;
     }
 
@@ -40,15 +40,15 @@ public abstract class BasicCommands {
         return LOGGER;
     }
 
-    protected boolean hasPartitions(String tableName) {
+    protected boolean hasPartitions(String tableName) throws Exception {
         return catalog.getFieldsPartitions("redshift", tableName).size() != 0 ? true : false;
     }
 
-    protected String getPartitions(String separator, String tableName, String year, String month, String day, String hour){
+    protected String getPartitions(String separator, String tableName, String year, String month, String day, String hour) throws Exception {
         return getPartitions(separator, tableName, year, month, day, hour, false);
     }
 
-    protected String getPartitions(String separator, String tableName, String year, String month, String day, String hour, boolean onlyField) {
+    protected String getPartitions(String separator, String tableName, String year, String month, String day, String hour, boolean onlyField) throws Exception {
         StringBuffer command = new StringBuffer();
         String[] values = {year, month, day, hour};
         List<Field> fields = catalog.getFieldsPartitions("redshift", tableName);
@@ -74,7 +74,7 @@ public abstract class BasicCommands {
     }
 
     private String prepareFieds(String tableName, List<Field> fields, boolean ddl) throws Exception{
-        StringBuffer command = new StringBuffer();
+        StringBuffer command = new StringBuffer("");
         int size = fields.size();
 
         for (int i = 0; i < fields.size(); i++) {
@@ -89,8 +89,15 @@ public abstract class BasicCommands {
                 command.append(",");
             }
         }
-
         return command.toString();
+    }
+
+    private String prepareHasPartitions(String tableName, List<Field> fields, boolean ddl, boolean externalTable) throws Exception {
+        StringBuffer properties = new StringBuffer();
+        if(externalTable && ddl){
+            properties.append("ROW FORMAT DELIMITED FIELDS TERMINATED BY '\\t' ");
+        }
+        return fields.isEmpty() ? (ddl ? properties.toString() : " ") : "PARTITIONED BY (" + prepareFieds(tableName, fields, ddl) + ") " + (ddl ? properties.toString() : " ");
     }
 
     protected String getFields(String schema, String tableName, boolean useRedshiftSource) throws Exception{
@@ -98,33 +105,27 @@ public abstract class BasicCommands {
     }
 
     protected List<Field> existTable(String database, String tableName, boolean useRedshiftSource) throws Exception {
-        return useRedshiftSource ? redshift.getFields(database, tableName) : catalog.getFields(database, tableName);
+        return existTable(database, tableName, useRedshiftSource, true);
+    }
+
+    protected List<Field> existTable(String database, String tableName, boolean useRedshiftSource, boolean ddl) throws Exception {
+        return useRedshiftSource ? redshift.getFields(database, tableName) : (ddl) ? catalog.getFieldsDDL(database, tableName) : catalog.getFields(database, tableName);
     }
 
     protected String createTable(String database, String tableName, boolean externalTable, List<Field> fields) throws Exception {
+        LOGGER.info("createQuery ======================== " + database + " - " + tableName + " - " + externalTable);
+
         StringBuffer command = new StringBuffer("CREATE " + (externalTable ? "EXTERNAL" : "") + " TABLE " + database + "." + tableName + " IF NOT EXISTS (" );
-        command.append(prepareFieds(tableName, fields, true) + ") ");
+
+        command.append(prepareFieds(tableName, fields, true)  + ") ");
+        command.append(externalTable ? prepareHasPartitions(tableName, catalog.getFieldsPartitions("redshift", tableName), true, externalTable) : prepareHasPartitions(tableName, catalog.getFieldsPartitionsFile(tableName), true, externalTable) );
 
         if(externalTable){
-            command.append("PARTITIONED BY (" + prepareFieds(tableName, catalog.getFieldsPartitions("redshift", tableName), true) + ") ");
+            command.append("LOCATION 's3a://99taxis-dw-international-online/hive-export/international/" + tableName + "/' ");
+            command.append("TBLPROPERTIES(\"skip.header.line.count\"=\"1\")");
         }else{
-            command.append("PARTITIONED BY (" + prepareFieds(tableName, catalog.getFieldsPartitionsFile(tableName), true) + ") ");
+            command.append("STORED AS PARQUET");
         }
-
-
-        if(externalTable){
-            // todo
-            command.append("LOCATION 's3a://99taxis-dw-international-online/hive-export/international/" + tableName + "/'; ");
-
-            //        TBLPROPERTIES ('key1'='value1', 'key2'='value2', ...)
-        }else{
-            command.append("STORED AS PARQUET; ");
-        }
-
-        return command.toString();
+        return command.toString() + "; ";
     }
-
-
-
-
 }

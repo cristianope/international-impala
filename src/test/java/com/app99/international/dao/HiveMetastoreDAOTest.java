@@ -1,4 +1,4 @@
-package com.app99.international.dao;
+/*package com.app99.international.dao;
 
 import com.app99.international.application.Application;
 import com.app99.international.configuration.EnvironmentVariable;
@@ -61,4 +61,4 @@ public class HiveMetastoreDAOTest extends EnvironmentVariable {
         assertTrue(catalog.isFullPartition("app_order_base_mx_d"));
     }
 
-}
+}*/

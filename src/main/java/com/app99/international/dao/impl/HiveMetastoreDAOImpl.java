@@ -3,7 +3,6 @@ package com.app99.international.dao.impl;
 import com.app99.international.dao.HiveMetastoreDAO;
 import com.app99.international.model.Field;
 import com.app99.international.model.ReadFile;
-import com.app99.international.service.impl.BasicCommands;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,13 +44,27 @@ public class HiveMetastoreDAOImpl extends JdbcDaoSupport implements HiveMetastor
 
 
     @Override
-    public List<Field> getFieldsPartitions(String database, String tableName){
+    public List<Field> getFieldsDDL(String database, String tableName) throws Exception{
+
+        List<Field> fields = getFields(database, tableName);
+        List<Field> partitions = getFieldsPartitions(database, tableName);
+        List<Field> partitions2 = getFieldsPartitionsFile(tableName);
+
+        partitions.removeAll(partitions2);
+
+        fields.addAll(partitions);
+
+        return fields;
+    }
+
+    @Override
+    public List<Field> getFieldsPartitions(String database, String tableName) throws Exception{
         String sql = PARTITIONS.replace(":database", database).replace(":table", tableName);
         return executeQuery(sql, tableName);
     }
 
     @Override
-    public List<Field> getFieldsPartitionsFile(String tableName){
+    public List<Field> getFieldsPartitionsFile(String tableName) throws Exception {
         List<String> linhas = new ReadFile().getFile("tables_partitions");
         List<Field> fields = new ArrayList<Field>();
 
@@ -59,20 +72,18 @@ public class HiveMetastoreDAOImpl extends JdbcDaoSupport implements HiveMetastor
             String[] columns = linha.split("=");
             String table = columns[0];
 
-
             if (tableName.equals(table)){
                 String[] tuples = columns[1].split(",");
 
                 for(String tuple: tuples) {
                     Field field = null;
-
                     if(tuple.equals("year")){
                         field = new Field(tuple, "smallint");
                     }else{
                         field = new Field(tuple, "tinyint");
                     }
-                    fields.add(field);
-                }
+                fields.add(field);
+            }
             }
         }
         return fields;

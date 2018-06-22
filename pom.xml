@@ -19,7 +19,10 @@
             <name>Boundless</name>
             <url>http://repo.boundlessgeo.com/main/</url>
         </repository>
-
+        <repository>
+            <id>redshift</id>
+            <url>http://redshift-maven-repository.s3-website-us-east-1.amazonaws.com/release</url>
+        </repository>
         <repository>
             <id>ooo-maven-repo</id>
             <url>http://ooo-maven.googlecode.com/hg/repository</url>
@@ -84,9 +87,9 @@
             <version>1.9.6</version>
         </dependency>
         <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-            <version>9.4.1208</version>
+            <groupId>com.amazon.redshift</groupId>
+            <artifactId>redshift-jdbc41-no-awssdk</artifactId>
+            <version>1.2.10.1009</version>
         </dependency>
         <dependency>
             <groupId>com.amazonaws</groupId>

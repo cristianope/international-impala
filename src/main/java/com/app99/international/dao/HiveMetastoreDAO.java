@@ -9,11 +9,13 @@ import java.util.List;
  */
 public interface HiveMetastoreDAO extends DAO{
 
-    boolean isFullPartition(String tableName);
+    boolean isFullPartition(String tableName) throws Exception;
 
-    List<Field> getFields(String database, String tableName);
+    List<Field> getFields(String database, String tableName) throws  Exception;
 
-    List<Field> getFieldsPartitions(String database, String tableName);
+    List<Field> getFieldsPartitions(String database, String tableName) throws Exception;
 
-    List<Field> getFieldsPartitionsFile(String tableName);
+    List<Field> getFieldsPartitionsFile(String tableName) throws Exception;
+
+    List<Field> getFieldsDDL(String database, String tableName) throws Exception;
 }

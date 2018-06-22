@@ -28,4 +28,17 @@ public class FieldTest {
         assertThat(field.toParquet("test"), equalTo(" CAST(column_name AS timestamp) "));
     }
 
+    @Test
+    public void toEqual() throws Exception {
+        Field field = new Field("column_name", "type_name");
+        Field field2 = new Field("column_name", "type_name");
+        Field field3 = new Field("column_name2", "type_name");
+        Field field4 = new Field("column_name2", "type_name2");
+
+        assertTrue(field.equals(field2));
+
+        assertFalse(field.equals(field3));
+
+    }
+
 }
