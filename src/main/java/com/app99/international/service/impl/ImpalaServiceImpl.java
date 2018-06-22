@@ -18,15 +18,16 @@ public class ImpalaServiceImpl extends BasicCommands implements ImpalaService{
         boolean hasIsFullPartition = getCatalog().isFullPartition(tableName);
 
         List<Field> fields = existTable(database, tableName, false);
-        if(fields.size() == 0){
+
+        if(fields.isEmpty()){
             command.append(createTable(database, tableName, false, existTable(oldDatabase, tableName, false)));
         }
 
-        if(hasIsFullPartition){
+       if(hasIsFullPartition && !(fields.isEmpty())){
             getLOGGER().info("isFullPartition - Add TRUNCATE command: " + database + "." + tableName);
             command.append("TRUNCATE " + database + "." + tableName + "; ");
         }else{
-            if(hasPartitions) {
+            if(hasPartitions && !(fields.isEmpty())) {
                 command.append("ALTER TABLE " + database + "." + tableName + " DROP PARTITION (" + getPartitions(",", tableName, year, month, day, hour) + "); ");
                 getLOGGER().info("DROP PARTITION - command: " + command.toString());
             }
@@ -46,6 +47,9 @@ public class ImpalaServiceImpl extends BasicCommands implements ImpalaService{
     }
 
     private String insertCommand(String database, String oldDatabase, String tableName, String[] date, boolean hasPartitions) throws Exception {
+
+        createTable(database, tableName, false, existTable(database, tableName, false));
+
         StringBuffer command = new StringBuffer(getParameters());
 
         command.append("INSERT INTO " + database + "." + tableName + " ");
@@ -69,17 +73,21 @@ public class ImpalaServiceImpl extends BasicCommands implements ImpalaService{
     }
 
     @Override
-    public boolean backfillTable(String tableName) throws Exception {
-        return executeCommand("SET mem_limit=64g; "+ insertCommand("new_app", "backfill", tableName, null, false));
+    public String backfillTable(String tableName) throws Exception {
+        return insertCommand("new_app", "backfill", tableName, null, false);
     }
 
     @Override
     public boolean executeCommand(String command) throws Exception{
+
+        // todo verifyTable()
         return true; // impalaD.executeCommand(command);
     }
 
+
+
     @Override
-    public  boolean AddPartitionsS3(String oldDatabase, String tableName, String year, String month, String day, String hour) throws Exception {
+    public  String AddPartitionsS3(String oldDatabase, String tableName, String year, String month, String day, String hour) throws Exception {
         StringBuffer partition = new StringBuffer("ALTER TABLE " + oldDatabase + "." + tableName + " ADD PARTITION(" + getPartitions(",", tableName, year, month, day, hour) + ") ");
         partition.append("LOCATION 's3a://99taxis-dw-international-online/hive-export/international/" + tableName + "/" + getPartitions("/", tableName, year, month, day, hour, true) + "/'; ");
         partition.append("COMPUTE INCREMENTAL STATS " + oldDatabase + "." + tableName + " PARTITION(" + getPartitions(",", tableName, year, month, day, hour) + ");");
@@ -97,13 +105,11 @@ public class ImpalaServiceImpl extends BasicCommands implements ImpalaService{
 */
         getLOGGER().info("Add Partition: " + partition.toString());
 
-        List<Field> fields = existTable("new_app", tableName, true);
+        List<Field> fields = existTable("redshift", tableName, true);
         if(fields.size() == 0){
-            partition.append(createTable(oldDatabase, tableName, true, fields));
+            partition.append(createTable(oldDatabase, tableName, true, existTable("new_app", tableName, true)));
         }
-
-        executeCommand(partition.toString());
-        return true;
+        return partition.toString();
     }
 
 

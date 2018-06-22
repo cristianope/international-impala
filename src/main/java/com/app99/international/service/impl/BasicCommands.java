@@ -1,7 +1,6 @@
 package com.app99.international.service.impl;
 
 import com.app99.international.dao.impl.HiveMetastoreDAOImpl;
-import com.app99.international.dao.impl.ImpalaDAOImpl;
 import com.app99.international.dao.impl.PostgreSQLDAOImpl;
 import com.app99.international.model.Field;
 import org.slf4j.Logger;
@@ -16,13 +15,11 @@ public abstract class BasicCommands {
     private static final Logger LOGGER = LoggerFactory.getLogger(BasicCommands.class);
 
     @Autowired
-
     private HiveMetastoreDAOImpl catalog;
 
-    @Autowired
-
+/*    @Autowired
     private ImpalaDAOImpl impalaD;
-
+*/
     @Autowired
     private PostgreSQLDAOImpl redshift;
 
@@ -31,10 +28,10 @@ public abstract class BasicCommands {
         return catalog;
     }
 
-    public ImpalaDAOImpl getImpalaD() {
-        return impalaD;
+/*    public ImpalaDAOImpl getImpalaD() {
+        return null; //impalaD;
     }
-
+*/
     public PostgreSQLDAOImpl getRedshift() {
         return redshift;
     }
@@ -60,17 +57,15 @@ public abstract class BasicCommands {
         for (int i = 0; i < fields.size(); i++) {
 
             if(onlyField){
-                command.append(fields.get(i).getField());
+                command.append(values[i]);
             }else{
                 command.append(fields.get(i).getField() + "=" + values[i]);
             }
 
-            if (--size == 0){
+            if (--size != 0){
                 command.append(separator);
             }
         }
-        LOGGER.info("Command: " + command.toString());
-
         return command.toString();
     }
 
@@ -78,22 +73,19 @@ public abstract class BasicCommands {
         return "SET compression_codec=snappy; SET parquet_file_size=256mb; ";
     }
 
-    private String prepareFields(String tableName, List<Field> fields) throws Exception{
-        return prepareFieds(tableName, fields, false);
-    }
-
     private String prepareFieds(String tableName, List<Field> fields, boolean ddl) throws Exception{
         StringBuffer command = new StringBuffer();
         int size = fields.size();
 
         for (int i = 0; i < fields.size(); i++) {
+            fields.get(i).updateFieldsNewDataTypes(tableName);
             if(ddl){
                 command.append(fields.get(i).toCreateDDL(tableName));
             }else{
                 command.append(fields.get(i).toParquet(tableName));
             }
 
-            if (--size == 0){
+            if (--size != 0){
                 command.append(",");
             }
         }
@@ -112,6 +104,13 @@ public abstract class BasicCommands {
     protected String createTable(String database, String tableName, boolean externalTable, List<Field> fields) throws Exception {
         StringBuffer command = new StringBuffer("CREATE " + (externalTable ? "EXTERNAL" : "") + " TABLE " + database + "." + tableName + " IF NOT EXISTS (" );
         command.append(prepareFieds(tableName, fields, true) + ") ");
+
+        if(externalTable){
+            command.append("PARTITIONED BY (" + prepareFieds(tableName, catalog.getFieldsPartitions("redshift", tableName), true) + ") ");
+        }else{
+            command.append("PARTITIONED BY (" + prepareFieds(tableName, catalog.getFieldsPartitionsFile(tableName), true) + ") ");
+        }
+
 
         if(externalTable){
             // todo

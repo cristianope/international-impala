@@ -1,3 +1,4 @@
+/*
 package com.app99.international.configuration;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -18,8 +19,9 @@ public class ImpalaDataSourceConfiguration {
     public DataSource impalaPoolingDataSource() {
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
         dataSource.setDriverClassName("com.cloudera.impala.jdbc41.Driver");
-//        dataSource.setUrl("jdbc:impala://IMPALAD_HOST:21050");
+//        dataSource.setUrl("jdbc:impala://127.0.0.1:21050");
         dataSource.setUrl(url);
         return dataSource;
     }
 }
+*/

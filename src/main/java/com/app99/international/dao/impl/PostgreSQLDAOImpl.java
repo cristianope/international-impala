@@ -3,25 +3,27 @@ package com.app99.international.dao.impl;
 
 import com.app99.international.dao.ImpalaDAO;
 import com.app99.international.dao.PostgreSQLDAO;
+import com.app99.international.listener.SQSListener;
 import com.app99.international.model.Field;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.support.JdbcDaoSupport;
 import org.springframework.stereotype.Repository;
 
 import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 @Repository
 public class PostgreSQLDAOImpl extends JdbcDaoSupport implements PostgreSQLDAO {
 
-    private final String FIELDS = "SET search_path TO :schema; SELECT p.column AS column_name, p.type AS type_name FROM pg_table_def p WHERE tablename = ':table'; ";
+    private final String FIELDS = "SELECT p.column AS column_name, p.type AS type_name FROM pg_table_def p WHERE tablename = ':table' and schemaname = ':schema'; ";
+    private final String PARAMETER =  "SET search_path TO :schema; ";
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(PostgreSQLDAOImpl.class);
     @Autowired
     private DataSource pgPoolingDataSource;
 
@@ -30,48 +32,13 @@ public class PostgreSQLDAOImpl extends JdbcDaoSupport implements PostgreSQLDAO {
         setDataSource(pgPoolingDataSource);
     }
 
-
-    private String verifyField(String field, String typeName){
-        if(typeName.startsWith("character")){
-            return "string";
-        }else{
-            if(typeName.startsWith("numeric")){
-                return typeName.replace("numeric", "decimal");
-            }else{
-                if(typeName.startsWith("integer")){
-                    return typeName.replace("integer","int");
-                }
-            }
-        }
-
-        if(field.equals("year")){
-            return "smallint";
-        }else{
-            if(field.contains("month,day,hour")){
-                return "tinyint";
-            }
-        }
-
-        return typeName;
-    }
-
-    private List<Field> executeQuery(String sql){
-        List<Field> fields = new ArrayList<Field>();
-
+    private List<Field> executeQuery(String sql, String parameter){
         Connection conn = null;
         try {
             conn = pgPoolingDataSource.getConnection();
-            PreparedStatement ps = conn.prepareStatement(sql);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                fields.add(new Field(
-                        rs.getString("column_name"),
-                        verifyField(rs.getString("column_name"), rs.getString("type_name"))
-                ));
-            }
-            rs.close();
-            ps.close();
-            return fields;
+            conn.setSchema("new_app");
+            conn.nativeSQL(parameter);
+            return executeQuery(sql, conn);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         } finally {
@@ -83,9 +50,29 @@ public class PostgreSQLDAOImpl extends JdbcDaoSupport implements PostgreSQLDAO {
         }
     }
 
+    private List<Field> executeQuery(String sql, Connection conn) throws SQLException{
+        List<Field> fields = new ArrayList<Field>();
+
+        LOGGER.info("executeQuery ======================== SQL: " + sql);
+
+        conn = pgPoolingDataSource.getConnection();
+        Statement ps =  conn.createStatement();
+        ResultSet rs = ps.executeQuery(sql);
+        while (rs.next()) {
+            Field field = new Field(
+                rs.getString("column_name"),
+                verifyField(rs.getString("column_name"), rs.getString("type_name")));
+            fields.add(field);
+        }
+        rs.close();
+        ps.close();
+        return fields;
+    }
+
     @Override
     public List<Field> getFields(String schema, String tableName) throws Exception {
-        String sql = FIELDS.replace(":schema", schema).replace(":table", tableName);
-        return executeQuery(sql);
+        String sql = FIELDS.replace(":table", tableName).replace(":schema", schema);
+        String parameter = PARAMETER.replace(":schema", schema);
+        return executeQuery(sql, parameter);
     }
 }

@@ -1,3 +1,4 @@
+/*
 package com.app99.international.dao.impl;
 
 
@@ -23,15 +24,19 @@ public class ImpalaDAOImpl  extends JdbcDaoSupport implements ImpalaDAO {
         setDataSource(impalaPoolingDataSource);
     }
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(ImpalaDAOImpl.class);
+
+
     @Override
-    public boolean executeCommand(String command) throws Exception {
+    public boolean executeCommand(String sql) throws Exception {
 
         Connection conn = null;
+        LOGGER.info("executeQuery ======================== SQL: " + sql);
 
         try {
             conn = impalaPoolingDataSource.getConnection();
-            PreparedStatement ps = conn.prepareStatement(command);
-            ps.execute();
+            Statement ps = conn.createStatement();
+            ps.executeQuery(sql);
             ps.close();
         } catch (SQLException e) {
             throw new Exception(e);
@@ -45,3 +50,4 @@ public class ImpalaDAOImpl  extends JdbcDaoSupport implements ImpalaDAO {
         return true;
     }
 }
+*/

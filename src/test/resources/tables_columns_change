@@ -1,0 +1,4 @@
+test=column_name:timestamp
+origin=column_name:string,column_name2:timestamp
+dim_city=stat_date:timestamp
+dwd_order_pay_success_hi=stat_date:timestamp

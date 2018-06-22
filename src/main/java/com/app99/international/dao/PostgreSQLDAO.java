@@ -4,7 +4,7 @@ import com.app99.international.model.Field;
 
 import java.util.List;
 
-public interface PostgreSQLDAO {
+public interface PostgreSQLDAO extends DAO{
 
     List<Field> getFields(String schema, String tableName) throws Exception;
 

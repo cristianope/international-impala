@@ -7,11 +7,13 @@ import java.util.List;
 /**
  * Created by vinicius.aquino on 6/20/18.
  */
-public interface HiveMetastoreDAO {
+public interface HiveMetastoreDAO extends DAO{
 
     boolean isFullPartition(String tableName);
 
     List<Field> getFields(String database, String tableName);
 
     List<Field> getFieldsPartitions(String database, String tableName);
+
+    List<Field> getFieldsPartitionsFile(String tableName);
 }
