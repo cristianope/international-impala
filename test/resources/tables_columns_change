@@ -1,0 +1,2 @@
+test=type_name:timestamp
+origin=type_name:string,type_name2:timestamp

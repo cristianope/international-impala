@@ -1,6 +1,7 @@
 package com.app99.international.model;
 
 
+import java.util.List;
 
 public class Field {
 
@@ -28,8 +29,34 @@ public class Field {
         this.type = type;
     }
 
-    public String toParquet(){
-        return " CAST(" + getField() + " as " + getType() + ") ";
+    public String toCreateDDL(String tableName){
+        return getField() + " " + changeType(tableName);
+    }
+
+    public String toParquet(String tableName){
+        return " CAST(" + getField() + " AS " + changeType(tableName) + ") ";
+    }
+
+    private String changeType(String tableName) {
+        List<String> linhas = new ReadFile().getFile("tables_columns_change");
+
+        for (String linha : linhas){
+            String[] columns = linha.split("=");
+            String table = columns[0];
+
+            if (tableName.equals(table)){
+                String[] tuples = columns[1].split(",");
+
+                for (String tuple: tuples) {
+                    String[] field = tuple.split(":");
+
+                    if (this.field.equals(field[0])){
+                        return field[1];
+                    }
+                }
+            }
+        }
+        return type;
     }
 
     @Override

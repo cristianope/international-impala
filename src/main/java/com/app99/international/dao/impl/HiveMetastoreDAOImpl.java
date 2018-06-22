@@ -2,21 +2,19 @@ package com.app99.international.dao.impl;
 
 import com.app99.international.dao.HiveMetastoreDAO;
 import com.app99.international.model.Field;
+import com.app99.international.model.ReadFile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.support.JdbcDaoSupport;
 import org.springframework.stereotype.Repository;
 
 import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
-import java.io.File;
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 
 /**
  * Created by vinicius.aquino on 6/20/18.
@@ -49,7 +47,7 @@ public class HiveMetastoreDAOImpl extends JdbcDaoSupport implements HiveMetastor
 
     @Override
     public boolean isFullPartition(String tableName) {
-        List<String> tables = getFile("tables_full_partition");
+        List<String> tables = new ReadFile().getFile("tables_full_partition");
 
         for (String table:tables) {
             if (tableName.equals(table)){
@@ -63,24 +61,6 @@ public class HiveMetastoreDAOImpl extends JdbcDaoSupport implements HiveMetastor
     public List<Field> getFields(String database, String tableName){
         String sql = FIELDS.replace(":database", database).replace(":table", tableName);
         return executeQuery(sql);
-    }
-
-    private List<String> getFile(String fileName) {
-        List<String> result = new ArrayList<String>();
-
-        ClassLoader classLoader = getClass().getClassLoader();
-        File file = new File(classLoader.getResource(fileName).getFile());
-
-        try (Scanner scanner = new Scanner(file)) {
-            while (scanner.hasNextLine()) {
-                String line = scanner.nextLine();
-                result.add(line);
-            }
-            scanner.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return result;
     }
 
     private List<Field> executeQuery(String sql){

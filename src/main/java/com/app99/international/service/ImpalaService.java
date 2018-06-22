@@ -7,4 +7,7 @@ public interface ImpalaService {
     String prepareCommand(String oldDatabase, String database, String tableName, String year, String month, String day, String hour) throws Exception;
 
     boolean executeCommand(String command) throws Exception;
+
+    boolean backfillTable(String tableName) throws Exception;
+
 }

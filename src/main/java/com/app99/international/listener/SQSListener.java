@@ -35,16 +35,22 @@ public class SQSListener implements MessageListener {
                 LOGGER.info("Received message " + textMessage.getText());
 
                 String[] token = fileKey.split("/");
-                String tableName = token[2];
-                String year   = token[3];
-                String month  = token[4];
-                String day    = token[5];
-                String hour   = token[6];
 
-                if(impalaService.AddPartitionsS3("redshift.", tableName, year, month, day, hour)){
-                    impalaService.executeCommand(impalaService.prepareCommand("redshift", "new_app", tableName, year, month, day, hour));
-                }else{
-                    LOGGER.info("Table: " + tableName + " - ERROR When was add a new partition " + fileKey);
+                if(token[1].equals("backfill")){
+                    String tableName = fileKey.split(":")[3];
+                    impalaService.backfillTable(tableName);
+
+                }else {
+                    String tableName = token[2];
+                    String year   = token[3];
+                    String month  = token[4];
+                    String day    = token[5];
+                    String hour   = token[6];
+                    if (impalaService.AddPartitionsS3("redshift.", tableName, year, month, day, hour)) {
+                        impalaService.executeCommand(impalaService.prepareCommand("redshift", "new_app", tableName, year, month, day, hour));
+                    } else {
+                        LOGGER.info("Table: " + tableName + " - ERROR When was add a new partition " + fileKey);
+                    }
                 }
 
             } else {
@@ -56,7 +62,7 @@ public class SQSListener implements MessageListener {
                 jmsTemplate.convertAndSend(message);
             }
         } catch (Exception e) {
-            LOGGER.error("Unknown error processing message, ignoring message.");
+            LOGGER.error("Unknown error processing message, ignoring message. " + e.getMessage());
         }
     }
 
