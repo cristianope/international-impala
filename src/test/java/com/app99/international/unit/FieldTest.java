@@ -11,7 +11,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import com.app99.international.model.Field;
 
 @RunWith(SpringRunner.class)
-//@SpringBootTest(classes = Application.class)
 public class FieldTest {
 
     @Test

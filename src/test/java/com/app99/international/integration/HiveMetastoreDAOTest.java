@@ -1,24 +1,18 @@
-/*package com.app99.international.dao;
+package com.app99.international.integration;
 
 import com.app99.international.application.Application;
 import com.app99.international.configuration.EnvironmentVariable;
-import com.app99.international.dao.impl.HiveMetastoreDAOImpl;
-import com.app99.international.dao.impl.PostgreSQLDAOImpl;
+import com.app99.international.integration.impl.HiveMetastoreDAOImpl;
 import com.app99.international.model.Field;
-import com.app99.international.service.impl.BasicCommands;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
-import sun.rmi.runtime.Log;
 
 import java.util.List;
 
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(SpringRunner.class)
@@ -61,4 +55,4 @@ public class HiveMetastoreDAOTest extends EnvironmentVariable {
         assertTrue(catalog.isFullPartition("app_order_base_mx_d"));
     }
 
-}*/
+}

@@ -1,6 +1,7 @@
 package com.app99.international.service.impl;
 
 import com.app99.international.model.Field;
+import com.app99.international.model.OptionField;
 import com.app99.international.service.ImpalaService;
 import org.springframework.stereotype.Service;
 
@@ -9,6 +10,10 @@ import java.util.List;
 
 @Service
 public class ImpalaServiceImpl extends BasicCommands implements ImpalaService{
+
+    private boolean hasPartitions(String tableName) throws Exception {
+        return hasPartitions(REDSHIFT, tableName);
+    }
 
 
     @Override
@@ -28,17 +33,18 @@ public class ImpalaServiceImpl extends BasicCommands implements ImpalaService{
             command.append("TRUNCATE " + database + "." + tableName + "; ");
         }else{
             if(hasPartitions && !(fields.isEmpty())) {
-                command.append("ALTER TABLE " + database + "." + tableName + " DROP PARTITION (" + getPartitions(",", tableName, year, month, day, hour) + "); ");
+                command.append("ALTER TABLE " + database + "." + tableName + " DROP PARTITION (" + getPartitions(",", oldDatabase,tableName, new String[]{year, month, day, hour}, OptionField.FIELD_EQUAL_VALUE) + "); ");
                 getLOGGER().info("DROP PARTITION - command: " + command.toString());
             }
         }
 
-        command.append(insertCommand(database, oldDatabase, tableName, new String[]{year, month, day, hour}, hasPartitions));
+        command.append(createInsertCommand(NEW_APP, tableName, getPartitionsImpalaNewApp(tableName), hasPartitions));
+        command.append(createSelectCommand(NEW_APP, oldDatabase, tableName, getPartitionsImpalaRedShift(tableName, new String[] {year,month,day,hour}), hasPartitions));
 
         if(hasIsFullPartition){
             command.append("COMPUTE STATS " + database + "." + tableName + "; ");
         }else{
-            command.append("COMPUTE INCREMENTAL STATS " + database + "." + tableName + " PARTITION(" + getPartitions(",", tableName, year, month, day, hour) + "); ");
+            command.append("COMPUTE INCREMENTAL STATS " + database + "." + tableName + " PARTITION(" + getPartitions(",", oldDatabase,tableName, new String[]{year, month, day, hour}, OptionField.FIELD_EQUAL_VALUE) + "); ");
         }
 
         getLOGGER().info("Final command: " + command.toString());
@@ -46,25 +52,42 @@ public class ImpalaServiceImpl extends BasicCommands implements ImpalaService{
         return command.toString();
     }
 
-    private String insertCommand(String database, String oldDatabase, String tableName, String[] date, boolean hasPartitions) throws Exception {
-
-        createTable(database, tableName, false, existTable(database, tableName, false));
-
+    protected String createInsertCommand(String database, String tableName, String partitions, boolean hasPartitions) throws Exception {
         StringBuffer command = new StringBuffer(getParameters());
 
         command.append("INSERT INTO " + database + "." + tableName + " ");
+
+        if(hasPartitions){
+            command.append("PARTITION (" + partitions +  ") ");
+        }
+
+        return command.toString();
+    }
+
+    protected String createSelectCommand(String selectDatabase, String fromDatabase, String tableName, String partitions, boolean hasPartitions)throws Exception{
+        return createSelectCommand(selectDatabase, fromDatabase, tableName, partitions, hasPartitions, false);
+    }
+
+    protected String createSelectCommand(String selectDatabase, String fromDatabase, String tableName, String partitions, boolean hasPartitions, boolean backfill) throws Exception {
+        StringBuffer command = new StringBuffer();
         command.append("SELECT ");
 
         if(tableName.startsWith("dim_")){
-            getLOGGER().info("dim_ found - Add DISTINCT command: " + database + "." + tableName);
             command.append("DISTINCT ");
         }
-
-        command.append(getFields(oldDatabase, tableName, false));
-        command.append(" FROM " + oldDatabase + "." + tableName + " ");
+        if(hasPartitions || backfill){
+            command.append(getFieldsOrderByPartitions(selectDatabase, tableName, true));
+            String sql = getPartitions(",", selectDatabase, tableName).trim();
+            if(sql.length() > 0){
+                command.append(", " + sql) ;
+            }
+        }else{
+            command.append(getFields(fromDatabase, tableName, false));
+        }
+        command.append(" FROM " + fromDatabase + "." + tableName + " ");
 
         if(hasPartitions) {
-            command.append("WHERE " + getPartitions(" AND ", tableName, date[0], date[1], date[2], date[3]));
+            command.append("WHERE " + partitions);
         }
 
         command.append("; ");
@@ -74,40 +97,42 @@ public class ImpalaServiceImpl extends BasicCommands implements ImpalaService{
 
     @Override
     public String backfillTable(String tableName) throws Exception {
-        return insertCommand("new_app", "backfill", tableName, null, false);
+        StringBuffer command = new StringBuffer();
+
+        command.append(createTable(NEW_APP, tableName, false, existTable(REDSHIFT, tableName, false)));
+        command.append(createInsertCommand(NEW_APP, tableName, getPartitionsImpalaNewApp(tableName), hasPartitions(BACKFILL, tableName)));
+        command.append(createSelectCommand(NEW_APP,BACKFILL, tableName, " ", false, true));
+
+        return command.toString();
     }
 
     @Override
-    public boolean executeCommand(String command) throws Exception{
+    public boolean executeQuery(String command) throws Exception{
+        return getImpalaD().executeQuery(command);
+    }
 
-        // todo verifyTable()
-        return true; // impalaD.executeCommand(command);
+    protected String getPartitionsImpalaRedShift(String tableName, String[] values) throws Exception {
+        return getPartitions(" AND ", REDSHIFT, tableName, values, OptionField.FIELD_EQUAL_VALUE);
+    }
+
+    protected String getPartitionsImpalaNewApp(String tableName) throws Exception{
+        return getPartitions(",", NEW_APP, tableName, new String[] {}, OptionField.ONLY_VALUES);
     }
 
 
 
     @Override
-    public  String AddPartitionsS3(String oldDatabase, String tableName, String year, String month, String day, String hour) throws Exception {
-        StringBuffer partition = new StringBuffer("ALTER TABLE " + oldDatabase + "." + tableName + " ADD PARTITION(" + getPartitions(",", tableName, year, month, day, hour) + ") ");
-        partition.append("LOCATION 's3a://99taxis-dw-international-online/hive-export/international/" + tableName + "/" + getPartitions("/", tableName, year, month, day, hour, true) + "/'; ");
-        partition.append("COMPUTE INCREMENTAL STATS " + oldDatabase + "." + tableName + " PARTITION(" + getPartitions(",", tableName, year, month, day, hour) + ");");
+    public  String AddPartitionsS3(String oldDatabase, String tableName, String[] values) throws Exception {
+        StringBuffer partition = new StringBuffer("ALTER TABLE " + oldDatabase + "." + tableName + " ADD PARTITION(" + getPartitions(",", oldDatabase, tableName, values, OptionField.FIELD_EQUAL_VALUE) + ") ");
+        partition.append("LOCATION 's3a://99taxis-dw-international-online/hive-export/international/" + tableName + "/" + getPartitions("/", oldDatabase, tableName, values, OptionField.ONLY_FIELDS) + "/'; ");
+        partition.append("COMPUTE INCREMENTAL STATS " + oldDatabase + "." + tableName + " PARTITION(" + getPartitions(",", oldDatabase, tableName, values, OptionField.FIELD_EQUAL_VALUE) + ");");
 
-      /*  StringBuffer partition = new StringBuffer("ALTER TABLE " + oldDatabase + "." + tableName + " ADD PARTITION(year="+ year +",month=" + month + ",day=" + day);
-        StringBuffer computeStats = new StringBuffer("COMPUTE INCREMENTAL STATS " + oldDatabase + "." + tableName + " PARTITION(year=" + year + ",month=" + month + ",day=" + day);
 
-        if (hour.length() > 3){
-            partition.append(") LOCATION 's3a://99taxis-dw-international-online/hive-export/international/" + tableName + "/" + year + "/" + month + "/" + day + "/'; ");
-            computeStats.append("); ");
-        }else{
-            partition.append(",hour=" + hour + ") LOCATION 's3a://99taxis-dw-international-online/hive-export/international/" + tableName + "/" + year + "/" + month + "/" + day + "/" + hour + "/'; ");
-            computeStats.append(",hour=" + hour + "); ");
-        }
-*/
-        getLOGGER().info("Add Partition: " + partition.toString());
+        getLOGGER().info("AddPartitionsS3 ================= " + partition.toString());
 
-        List<Field> fields = existTable("redshift", tableName, true);
+        List<Field> fields = existTable(REDSHIFT, tableName, false, false);
         if(fields.size() == 0){
-            partition.append(createTable(oldDatabase, tableName, true, existTable("new_app", tableName, true)));
+            partition.append(createTable(oldDatabase, tableName, true, existTable(NEW_APP, tableName, true)));
         }
         return partition.toString();
     }

@@ -1,7 +1,7 @@
-package com.app99.international.dao.impl;
+package com.app99.international.integration.impl;
 
 
-import com.app99.international.dao.RedshiftDAO;
+import com.app99.international.integration.RedshiftDAO;
 import com.app99.international.model.Field;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

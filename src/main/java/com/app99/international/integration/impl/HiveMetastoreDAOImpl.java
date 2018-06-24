@@ -1,6 +1,6 @@
-package com.app99.international.dao.impl;
+package com.app99.international.integration.impl;
 
-import com.app99.international.dao.HiveMetastoreDAO;
+import com.app99.international.integration.HiveMetastoreDAO;
 import com.app99.international.model.Field;
 import com.app99.international.model.ReadFile;
 import org.slf4j.Logger;
@@ -18,9 +18,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by vinicius.aquino on 6/20/18.
- */
 @Repository
 public class HiveMetastoreDAOImpl extends JdbcDaoSupport implements HiveMetastoreDAO {
 
@@ -53,6 +50,8 @@ public class HiveMetastoreDAOImpl extends JdbcDaoSupport implements HiveMetastor
         partitions.removeAll(partitions2);
 
         fields.addAll(partitions);
+
+
 
         return fields;
     }

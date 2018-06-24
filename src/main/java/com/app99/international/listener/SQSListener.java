@@ -46,8 +46,8 @@ public class SQSListener implements MessageListener {
                     String month  = token[4];
                     String day    = token[5];
                     String hour   = token[6];
-                    if(impalaService.executeCommand(impalaService.AddPartitionsS3("redshift.", tableName, year, month, day, hour))) {
-                        impalaService.executeCommand(impalaService.prepareCommand("redshift", "new_app", tableName, year, month, day, hour));
+                    if(impalaService.executeQuery(impalaService.AddPartitionsS3("redshift.", tableName, new String[]{year, month, day, hour}))) {
+                        impalaService.executeQuery(impalaService.prepareCommand("redshift", "new_app", tableName, year, month, day, hour));
                     } else {
                         LOGGER.info("Table: " + tableName + " - ERROR When was add a new partition " + fileKey);
                     }

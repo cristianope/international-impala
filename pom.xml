@@ -19,6 +19,7 @@
             <name>Boundless</name>
             <url>http://repo.boundlessgeo.com/main/</url>
         </repository>
+
         <repository>
             <id>redshift</id>
             <url>http://redshift-maven-repository.s3-website-us-east-1.amazonaws.com/release</url>
@@ -27,9 +28,27 @@
             <id>ooo-maven-repo</id>
             <url>http://ooo-maven.googlecode.com/hg/repository</url>
         </repository>
+        <repository>
+            <id>cloudera</id>
+            <url>https://repository.cloudera.com/artifactory/cloudera-repos/</url>
+        </repository>
     </repositories>
     <dependencies>
-
+        <dependency>
+            <groupId>org.apache.zookeeper</groupId>
+            <artifactId>zookeeper</artifactId>
+            <version>3.4.6</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.thrift</groupId>
+            <artifactId>libfb303</artifactId>
+            <version>0.9.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.thrift</groupId>
+            <artifactId>libthrift</artifactId>
+            <version>0.9.0</version>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
@@ -57,6 +76,16 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-nop</artifactId>
             <version>1.7.25</version>
+        </dependency>
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+            <version>1.2.14</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <version>1.5.11</version>
         </dependency>
 
         <dependency>
@@ -122,6 +151,49 @@
             <groupId>org.hamcrest</groupId>
             <artifactId>hamcrest-all</artifactId>
             <version>RELEASE</version>
+        </dependency>
+
+        <dependency>
+            <groupId>tcliservice</groupId>
+            <artifactId>tcliservice</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/BOOT-INF/lib/TCLIServiceClient.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>thrift</groupId>
+            <artifactId>linthrift</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/BOOT-INF/lib/libthrift-0.9.0.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>libfb</groupId>
+            <artifactId>fb303</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/BOOT-INF/lib/libfb303-0.9.0.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>impala</groupId>
+            <artifactId>jdbc41</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/BOOT-INF/lib/impalaJDBC41.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>hive</groupId>
+            <artifactId>metastore</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/BOOT-INF/lib/hive_metastore.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>hive</groupId>
+            <artifactId>service</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/BOOT-INF/lib/hive_service.jar</systemPath>
         </dependency>
 
     </dependencies>

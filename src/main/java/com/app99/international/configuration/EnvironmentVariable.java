@@ -15,7 +15,7 @@ public abstract class EnvironmentVariable {
         System.setProperty("PG_DATABASE", "dw");
         System.setProperty("PG_URL", "52.23.190.227");
 
-        System.setProperty("IMPALA_URL", "jdbc:impala://127.0.0.1:21050");
+        System.setProperty("IMPALA_URL", "jdbc:impala://127.0.0.1:21051/new_app");
         System.setProperty("JDBC_DRIVER", "com.cloudera.impala.jdbc41.Driver");
     }
 }

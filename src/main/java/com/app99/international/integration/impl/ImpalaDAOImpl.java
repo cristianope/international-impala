@@ -1,17 +1,18 @@
-/*
-package com.app99.international.dao.impl;
+package com.app99.international.integration.impl;
 
 
-import com.app99.international.dao.ImpalaDAO;
+import com.app99.international.integration.ImpalaDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.support.JdbcDaoSupport;
 import org.springframework.stereotype.Repository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 @Repository
 public class ImpalaDAOImpl  extends JdbcDaoSupport implements ImpalaDAO {
@@ -28,17 +29,23 @@ public class ImpalaDAOImpl  extends JdbcDaoSupport implements ImpalaDAO {
 
 
     @Override
-    public boolean executeCommand(String sql) throws Exception {
+    public boolean executeQuery(String sql) throws Exception {
+
+        String[] queries = sql.trim().split(";");
 
         Connection conn = null;
-        LOGGER.info("executeQuery ======================== SQL: " + sql);
+        boolean result = false;
 
         try {
             conn = impalaPoolingDataSource.getConnection();
             Statement ps = conn.createStatement();
-            ps.executeQuery(sql);
+            for(String query: queries){
+                result = ps.execute(query);
+            }
             ps.close();
+            return result;
         } catch (SQLException e) {
+            LOGGER.info("executeQuery ======================== Exception: " + e.getMessage());
             throw new Exception(e);
         } finally {
             if (conn != null) {
@@ -47,7 +54,5 @@ public class ImpalaDAOImpl  extends JdbcDaoSupport implements ImpalaDAO {
                 } catch (SQLException e) {}
             }
         }
-        return true;
     }
 }
-*/

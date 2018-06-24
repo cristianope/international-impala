@@ -1,4 +1,3 @@
-/*
 package com.app99.international.configuration;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -6,22 +5,22 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
-import javax.sql.DataSource;
 
 @Configuration
 public class ImpalaDataSourceConfiguration {
 
-
     @Value("${IMPALA_URL}")
     private String url;
 
+    String DRIVER = "com.cloudera.impala.jdbc41.Driver";
+
     @Bean(name = "impalaPoolingDataSource", destroyMethod = "")
-    public DataSource impalaPoolingDataSource() {
-        DriverManagerDataSource dataSource = new DriverManagerDataSource();
-        dataSource.setDriverClassName("com.cloudera.impala.jdbc41.Driver");
-//        dataSource.setUrl("jdbc:impala://127.0.0.1:21050");
-        dataSource.setUrl(url);
-        return dataSource;
+    public DriverManagerDataSource impalaPoolingDataSource() {
+        DriverManagerDataSource ds = new DriverManagerDataSource();
+        ds.setDriverClassName(DRIVER);
+//      ds.setUrl("jdbc:impala://127.0.0.1:21051/new_app;");
+        ds.setUrl(url);
+        return ds;
+
     }
 }
-*/

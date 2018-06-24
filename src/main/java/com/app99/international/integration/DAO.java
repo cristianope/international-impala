@@ -1,4 +1,4 @@
-package com.app99.international.dao;
+package com.app99.international.integration;
 
 
 public interface DAO {
