@@ -29,7 +29,6 @@ public class BasicCommandsTest extends BasicCommands{
     private static final String NEW_APP = "new_app";
     private static final String REDSHIFT = "redshift";
 
-
     @Test
     public void getFieldsByOrderByPartitions() throws Exception {
         String ddl = getFieldsOrderByPartitions(REDSHIFT, DIM_CITY, true) ;
@@ -93,7 +92,7 @@ public class BasicCommandsTest extends BasicCommands{
     @Test
     public void externalTable() throws Exception {
         String ddl = createTable(REDSHIFT, DIM_CITY, true, existTable(NEW_APP, DIM_CITY, true));
-        assertTrue(ddl.contains("CREATE EXTERNAL TABLE redshift.dim_city IF NOT EXISTS (timezone bigint,country_id bigint,stat_date timestamp," +
+        assertTrue(ddl.contains("CREATE EXTERNAL TABLE IF NOT EXISTS redshift.dim_city (timezone bigint,country_id bigint,stat_date timestamp," +
                 "stat_hour string,current_stat_date string,current_stat_hour string,city_id bigint,district string,name_zh string," +
                 "name_en string,car_prefix string,center_lng decimal(38,6),center_lat decimal(38,6),a_create_time string,a_modify_time string," +
                 "is_use bigint,country_name string,county_id bigint,county_name string,country_code string) PARTITIONED BY (year smallint," +
@@ -101,22 +100,22 @@ public class BasicCommandsTest extends BasicCommands{
                 "'s3a://99taxis-dw-international-online/hive-export/international/dim_city/' TBLPROPERTIES(\"skip.header.line.count\"=\"1\"); "));
     }
 
-
     @Test
     public void internalTable() throws Exception {
         String ddl = createTable(NEW_APP, DIM_CITY, false, getCatalog().getFieldsDDL(REDSHIFT,DIM_CITY));
-        assertTrue(ddl.contains("CREATE  TABLE new_app.dim_city IF NOT EXISTS (timezone bigint,country_id bigint,stat_date timestamp,stat_hour string," +
+        assertTrue(ddl.contains("CREATE  TABLE IF NOT EXISTS new_app.dim_city (timezone bigint,country_id bigint,stat_date timestamp,stat_hour string," +
                 "current_stat_date string,current_stat_hour string,city_id bigint,district string,name_zh string,name_en string,car_prefix string," +
                 "center_lng decimal(38,6),center_lat decimal(38,6),a_create_time string,a_modify_time string,is_use bigint,country_name string," +
-                "county_id bigint,county_name string,country_code string,day tinyint,hour tinyint) PARTITIONED BY (year smallint,month tinyint) STORED AS PARQUET;"));
+                "county_id bigint,county_name string,country_code string,year smallint,month tinyint,day tinyint,hour tinyint) STORED AS PARQUET;"));
     }
 
     @Test
     public void internalTableNotExistPartitions() throws Exception {
         String ddl = createTable(NEW_APP, "dwm_driver_online_his", false, existTable(REDSHIFT, "dwm_driver_online_his", false, true));
-        assertTrue(ddl.contains("CREATE  TABLE new_app.dwm_driver_online_his IF NOT EXISTS (timezone bigint,country_id bigint,stat_date string,stat_hour string," +
-                "current_stat_date string,current_stat_hour string,product_id string,city_id bigint,driver_id bigint,first_listen_time string," +
-                "last_listen_time string,total_driver_listen_time decimal(38,6),country_code string,year smallint,month smallint,day smallint,hour smallint) STORED AS PARQUET;"));
+        assertTrue(ddl.contains("CREATE  TABLE IF NOT EXISTS new_app.dwm_driver_online_his (timezone bigint,country_id bigint,stat_date string," +
+                "stat_hour string,current_stat_date string,current_stat_hour string,product_id string,city_id bigint,driver_id bigint,first_listen_time string," +
+                "last_listen_time string,total_driver_listen_time decimal(38,6),country_code string,year smallint,month smallint,day smallint,hour smallint) " +
+                "STORED AS PARQUET; "));
     }
 
 }

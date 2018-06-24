@@ -1,8 +1,9 @@
 package com.app99.international.configuration;
 
+
 public abstract class EnvironmentVariable {
 
-    static{
+    static {
         System.setProperty("QUEUE_ENDPOINT", "https://queue.amazonaws.com/492822123016/");
         System.setProperty("QUEUE_NAME", "international-impala");
 
@@ -13,7 +14,7 @@ public abstract class EnvironmentVariable {
         System.setProperty("PG_PASS", "MX3Mpd9NsBAd22PU9BmAX7*AqxRgrbGZjGyGKNt5");
         System.setProperty("PG_USER", "admindw");
         System.setProperty("PG_DATABASE", "dw");
-        System.setProperty("PG_URL", "52.23.190.227");
+        System.setProperty("PG_URL", "jdbc:redshift://dw.cthopyfgalif.us-east-1.redshift.amazonaws.com:5439/dw");
 
         System.setProperty("IMPALA_URL", "jdbc:impala://127.0.0.1:21051/new_app");
         System.setProperty("JDBC_DRIVER", "com.cloudera.impala.jdbc41.Driver");

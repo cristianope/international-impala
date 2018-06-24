@@ -31,11 +31,11 @@ public class ImpalaServiceImpl extends BasicCommands implements ImpalaService{
        if(hasIsFullPartition && !(fields.isEmpty())){
             getLOGGER().info("isFullPartition - Add TRUNCATE command: " + database + "." + tableName);
             command.append("TRUNCATE " + database + "." + tableName + "; ");
-        }else{
+        /*}else{
             if(hasPartitions && !(fields.isEmpty())) {
                 command.append("ALTER TABLE " + database + "." + tableName + " DROP PARTITION (" + getPartitions(",", oldDatabase,tableName, new String[]{year, month, day, hour}, OptionField.FIELD_EQUAL_VALUE) + "); ");
                 getLOGGER().info("DROP PARTITION - command: " + command.toString());
-            }
+            }*/
         }
 
         command.append(createInsertCommand(NEW_APP, tableName, getPartitionsImpalaNewApp(tableName), hasPartitions));

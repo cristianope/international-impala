@@ -63,8 +63,10 @@ public class ImpalaServiceImplTest extends ImpalaServiceImpl {
     @Test
     public void createSelectCommandPartitions() throws Exception {
         String ddl = createSelectCommand(NEW_APP, REDSHIFT, ODS_LOG, getPartitionsImpalaRedShift(DIM_CITY, new String[]{"2018", "05", "05", "10"}), true);
-        assertTrue(ddl.contains("SELECT  CAST(prefix_key AS string) , CAST(param AS string) , CAST(day AS tinyint) , CAST(hour AS tinyint) ,  " +
-                "CAST(year AS smallint) , CAST(month AS tinyint)  FROM redshift.ods_log_pbs_starfall_audit WHERE year=2018 AND month=05 AND day=05 AND hour=10;"));
+        LOGGER.info("============= " + ddl);
+        assertTrue(ddl.contains("SELECT  CAST(prefix_key AS string) , CAST(param AS string) , CAST(day AS tinyint) , " +
+                "CAST(hour AS tinyint) , CAST(year AS smallint) , CAST(month AS tinyint) FROM redshift.ods_log_pbs_starfall_audit " +
+                "WHERE year=2018 AND month=05 AND day=05 AND hour=10;"));
 
     }
 
@@ -101,22 +103,21 @@ public class ImpalaServiceImplTest extends ImpalaServiceImpl {
                 " CAST(current_stat_hour AS string) , CAST(order_id AS bigint) , CAST(city_id AS bigint) , CAST(product_id AS bigint) ," +
                 " CAST(passenger_id AS bigint) , CAST(driver_id AS bigint) , CAST(payable_cost AS decimal(38,6)) , CAST(actual_cost AS decimal(38,6)) ," +
                 " CAST(is_use_coupon AS bigint) , CAST(coupon_spend AS decimal(38,6)) , CAST(pay_info AS string) , CAST(country_code AS string) ," +
-                " CAST(day AS tinyint) , CAST(hour AS tinyint) ,  CAST(year AS smallint) , CAST(month AS tinyint)  FROM backfill.dwd_order_pay_success_hi ; "));
+                " CAST(day AS tinyint) , CAST(hour AS tinyint) , CAST(year AS smallint) , CAST(month AS tinyint) FROM backfill.dwd_order_pay_success_hi ; "));
     }
 
 
     @Test
     public void prepareCommand() throws Exception {
         String ddl = service.prepareCommand(REDSHIFT, NEW_APP, "dwd_order_pay_success_hi", "2018", "05", "05", "10" );
-        assertTrue(ddl.contains("ALTER TABLE new_app.dwd_order_pay_success_hi DROP PARTITION (year=2018,month=05,day=05,hour=10); " +
-                "SET compression_codec=snappy; SET parquet_file_size=256mb; INSERT INTO new_app.dwd_order_pay_success_hi PARTITION" +
-                " (year,month) SELECT  CAST(timezone AS bigint) , CAST(country_id AS bigint) , CAST(stat_date AS timestamp) , " +
-                "CAST(stat_hour AS string) , CAST(current_stat_date AS timestamp) , CAST(current_stat_hour AS string) , CAST(order_id AS bigint) ," +
-                " CAST(city_id AS bigint) , CAST(product_id AS bigint) , CAST(passenger_id AS bigint) , CAST(driver_id AS bigint) , " +
-                "CAST(payable_cost AS decimal(38,6)) , CAST(actual_cost AS decimal(38,6)) , CAST(is_use_coupon AS bigint) , CAST(coupon_spend AS decimal(38,6)) " +
-                ", CAST(pay_info AS string) , CAST(country_code AS string) , CAST(day AS tinyint) , CAST(hour AS tinyint) ,  CAST(year AS smallint) ," +
-                " CAST(month AS tinyint)  FROM redshift.dwd_order_pay_success_hi WHERE year=2018 AND month=05 AND day=05 AND hour=10; " +
-                "COMPUTE INCREMENTAL STATS new_app.dwd_order_pay_success_hi PARTITION(year=2018,month=05,day=05,hour=10); "));
+        assertTrue(ddl.contains("SET compression_codec=snappy; SET parquet_file_size=256mb; INSERT INTO new_app.dwd_order_pay_success_hi PARTITION" +
+                " (year,month) SELECT  CAST(timezone AS bigint) , CAST(country_id AS bigint) , CAST(stat_date AS timestamp) , CAST(stat_hour AS string) ," +
+                " CAST(current_stat_date AS timestamp) , CAST(current_stat_hour AS string) , CAST(order_id AS bigint) , CAST(city_id AS bigint) ," +
+                " CAST(product_id AS bigint) , CAST(passenger_id AS bigint) , CAST(driver_id AS bigint) , CAST(payable_cost AS decimal(38,6)) ," +
+                " CAST(actual_cost AS decimal(38,6)) , CAST(is_use_coupon AS bigint) , CAST(coupon_spend AS decimal(38,6)) , CAST(pay_info AS string) ," +
+                " CAST(country_code AS string) , CAST(day AS tinyint) , CAST(hour AS tinyint) , CAST(year AS smallint) , CAST(month AS tinyint)" +
+                " FROM redshift.dwd_order_pay_success_hi WHERE year=2018 AND month=05 AND day=05 AND hour=10; COMPUTE INCREMENTAL STATS " +
+                "new_app.dwd_order_pay_success_hi PARTITION(year=2018,month=05,day=05,hour=10); "));
     }
 
 
