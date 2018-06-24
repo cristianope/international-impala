@@ -1,4 +1,4 @@
-package com.app99.international.service;
+/*package com.app99.international.service;
 
 
 import com.app99.international.application.Application;
@@ -14,8 +14,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
 
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = Application.class)
@@ -36,7 +36,7 @@ public class ImpalaServiceImplTest extends ImpalaServiceImpl {
 
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BasicCommands.class);
-
+/*
 
     @Test
     public void createInsertCommand() throws Exception {
@@ -120,7 +120,7 @@ public class ImpalaServiceImplTest extends ImpalaServiceImpl {
                 "new_app.dwd_order_pay_success_hi PARTITION(year=2018,month=05,day=05,hour=10); "));
     }
 
-
+*
     @Test
     public void executeCommandDDL() throws Exception {
        assertFalse(service.executeQuery("SET compression_codec=snappy; SET parquet_file_size=256mb; "));
@@ -131,3 +131,4 @@ public class ImpalaServiceImplTest extends ImpalaServiceImpl {
         assertTrue(service.executeQuery("SELECT 1;"));
     }
 }
+*/

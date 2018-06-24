@@ -11,23 +11,23 @@ import javax.sql.DataSource;
 public class RedshiftDataSourceConfiguration {
 
     @Value("${PG_PASS}")
-    private String pass;
+    private String pgPass;
 
     @Value("${PG_USER}")
-    private String user;
+    private String pgUser;
 
     @Value("${PG_URL}")
-    private String url;
+    private String pgUrl;
 
     @Bean(name = "pgPoolingDataSource", destroyMethod = "")
     public DataSource pgPoolingDataSource() {
         PGCommonDataSource pgPoolingDataSource = new com.amazon.redshift.jdbc41.DataSource();
-        pgPoolingDataSource.setURL(url);
+        pgPoolingDataSource.setURL(pgUrl);
 //        pgPoolingDataSource.setURL("jdbc:redshift://dw.cthopyfgalif.us-east-1.redshift.amazonaws.com:5439/dw");
-        pgPoolingDataSource.setUserID(user);
+        pgPoolingDataSource.setUserID(pgUser);
 //        pgPoolingDataSource.setUserID("admindw");
 //        pgPoolingDataSource.setPassword("MX3Mpd9NsBAd22PU9BmAX7*AqxRgrbGZjGyGKNt5");
-        pgPoolingDataSource.setPassword(pass);
+        pgPoolingDataSource.setPassword(pgPass);
         return pgPoolingDataSource;
     }
 }

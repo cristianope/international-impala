@@ -11,25 +11,23 @@ import javax.sql.DataSource;
 public class MySQLDataSourceConfiguration {
 
     @Value("${MYSQL_PASS}")
-    private String password;
+    private String myPass;
 
     @Value("${MYSQL_USER}")
-    private String user;
+    private String myUser;
 
     @Value("${MYSQL_URL}")
-    private String url;
+    private String myUrl;
 
     @Bean(name = "myPoolingDataSource", destroyMethod = "")
     public DataSource myPoolingDataSource() {
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
         dataSource.setDriverClassName("com.mysql.jdbc.Driver");
 //        dataSource.setPassword("#99taxis#");
-        dataSource.setPassword(password);
-//        dataSource.setUrl("jdbc:mysql://db-cloudera.cpmjqhydxmyv.us-east-1.rds.amazonaws.com:3306/hivedb_k1iiujc5fnqaj3r1akldljulni");
+        dataSource.setPassword(myPass);
 //        dataSource.setUrl("jdbc:mysql://127.0.0.1:3306/hivedb_k1iiujc5fnqaj3r1akldljulni");
-        dataSource.setUrl(url);
-//        dataSource.setUsername("cloudera");
-        dataSource.setUsername(user);
+        dataSource.setUrl(myUrl);
+        dataSource.setUsername(myUser);
         return dataSource;
     }
 }

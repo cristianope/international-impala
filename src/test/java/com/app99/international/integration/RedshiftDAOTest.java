@@ -3,7 +3,7 @@ package com.app99.international.integration;
 import static org.junit.Assert.*;
 
 import com.app99.international.application.Application;
-import com.app99.international.configuration.EnvironmentVariable;
+import com.app99.international.environment.EnvironmentVariable;
 import com.app99.international.integration.impl.RedshiftDAOImpl;
 import org.junit.Test;
 import org.junit.runner.RunWith;

@@ -10,7 +10,7 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
 public class ImpalaDataSourceConfiguration {
 
     @Value("${IMPALA_URL}")
-    private String url;
+    private String impalaUrl;
 
     String DRIVER = "com.cloudera.impala.jdbc41.Driver";
 
@@ -19,7 +19,7 @@ public class ImpalaDataSourceConfiguration {
         DriverManagerDataSource ds = new DriverManagerDataSource();
         ds.setDriverClassName(DRIVER);
 //      ds.setUrl("jdbc:impala://127.0.0.1:21051/new_app;");
-        ds.setUrl(url);
+        ds.setUrl(impalaUrl);
         return ds;
 
     }

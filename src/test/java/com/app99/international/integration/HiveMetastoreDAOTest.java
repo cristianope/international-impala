@@ -1,7 +1,7 @@
 package com.app99.international.integration;
 
 import com.app99.international.application.Application;
-import com.app99.international.configuration.EnvironmentVariable;
+import com.app99.international.environment.EnvironmentVariable;
 import com.app99.international.integration.impl.HiveMetastoreDAOImpl;
 import com.app99.international.model.Field;
 import org.junit.Test;

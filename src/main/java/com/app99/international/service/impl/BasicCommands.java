@@ -1,6 +1,5 @@
 package com.app99.international.service.impl;
 
-import com.app99.international.configuration.EnvironmentVariable;
 import com.app99.international.integration.impl.HiveMetastoreDAOImpl;
 import com.app99.international.integration.impl.ImpalaDAOImpl;
 import com.app99.international.integration.impl.RedshiftDAOImpl;
@@ -13,7 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 
 
-public abstract class BasicCommands extends EnvironmentVariable {
+public abstract class BasicCommands{
 
    private static final Logger LOGGER = LoggerFactory.getLogger(BasicCommands.class);
 

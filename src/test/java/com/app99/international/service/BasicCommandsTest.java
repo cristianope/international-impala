@@ -32,11 +32,11 @@ public class BasicCommandsTest extends BasicCommands{
     @Test
     public void getFieldsByOrderByPartitions() throws Exception {
         String ddl = getFieldsOrderByPartitions(REDSHIFT, DIM_CITY, true) ;
-
+        LOGGER.info("================  " + ddl);
         assertTrue(ddl.contains(""));
     }
 
-
+/*
     @Test
     public void existTableRedshift() throws Exception {
         assertFalse(existTable(NEW_APP, DIM_CITY, true).isEmpty());
@@ -117,7 +117,7 @@ public class BasicCommandsTest extends BasicCommands{
                 "last_listen_time string,total_driver_listen_time decimal(38,6),country_code string,year smallint,month smallint,day smallint,hour smallint) " +
                 "STORED AS PARQUET; "));
     }
-
+*/
 }
 
 
