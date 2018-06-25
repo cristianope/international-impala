@@ -1,19 +1,17 @@
 # Project Chameleon
 
-  Chameleon is a open source that read a source - only Redshift - and understand how structure was built, after that - based in rules - the a new structure is created at Impala/Hive.
-  Two databases are created in Impala/Hive:
-       * S3 format - This is a first structure created, this database reach data in S3, normally where data it.
-       * Parquet format - This is a format more specify and must be used when want execute queries.
+Chameleon is a open source that read a source - only Redshift - and understand how structure was built, after that - based in rules - the a new structure is created at Impala/Hive.
+Two databases are created in Impala/Hive:
+* S3 format - This is a first structure created, this database reach data in S3, normally where data it.
+* Parquet format - This is a format more specify and must be used when want execute queries.
 
-
-       This application depends SQS/SNS, this Chameleon listen a queue and does him job. So, It's necessary to create a event in aws when a actions happen.
+  This application depends SQS/SNS, this Chameleon listen a queue and does him job. So, It's necessary to create a event in aws when a actions happen.
 
 ## Maven
 
 This project use Maven, so it's necessary have a some especify libraries.
-    * mvn clean test - Execute tests
-        To run a test is necessary change the variables in EnvironmentVariable Class (test folder)
-    * mvn clean install - Execute tests and create a jar file.
+* mvn clean test - Execute tests (To run a test is necessary change the variables in EnvironmentVariable Class (test folder))
+* mvn clean install - Execute tests and create a jar file.
 
 It's necessary to configure environment variables:
 
