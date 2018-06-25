@@ -32,11 +32,16 @@ public class BasicCommandsTest extends BasicCommands{
     @Test
     public void getFieldsByOrderByPartitions() throws Exception {
         String ddl = getFieldsOrderByPartitions(REDSHIFT, DIM_CITY, true) ;
-        LOGGER.info("================  " + ddl);
-        assertTrue(ddl.contains(""));
+        assertTrue(ddl.contains("CAST(timezone AS bigint) , CAST(country_id AS bigint) , CAST(stat_date AS timestamp) ," +
+                " CAST(stat_hour AS string) , CAST(current_stat_date AS string) , CAST(current_stat_hour AS string) ," +
+                " CAST(city_id AS bigint) , CAST(district AS string) , CAST(name_zh AS string) , CAST(name_en AS string) ," +
+                " CAST(car_prefix AS string) , CAST(center_lng AS decimal(38,6)) , CAST(center_lat AS decimal(38,6)) ," +
+                " CAST(a_create_time AS string) , CAST(a_modify_time AS string) , CAST(is_use AS bigint) , CAST(country_name AS string) ," +
+                " CAST(county_id AS bigint) , CAST(county_name AS string) , CAST(country_code AS string) , CAST(year AS smallint) ," +
+                " CAST(month AS tinyint) , CAST(day AS tinyint) , CAST(hour AS tinyint) "));
     }
 
-/*
+
     @Test
     public void existTableRedshift() throws Exception {
         assertFalse(existTable(NEW_APP, DIM_CITY, true).isEmpty());
@@ -117,7 +122,17 @@ public class BasicCommandsTest extends BasicCommands{
                 "last_listen_time string,total_driver_listen_time decimal(38,6),country_code string,year smallint,month smallint,day smallint,hour smallint) " +
                 "STORED AS PARQUET; "));
     }
-*/
-}
 
+    @Test
+    public void internalTablePartitions() throws Exception {
+        String ddl = createTable("redshift", "dwd_order_broadcast_hi", false, existTable(REDSHIFT, "dwd_order_broadcast_hi", false));
+        assertTrue(ddl.contains("CREATE  TABLE IF NOT EXISTS redshift.dwd_order_broadcast_hi (timezone bigint,country_id bigint,stat_date string,stat_hour string," +
+                "current_stat_date string,current_stat_hour string,order_id bigint,product_id bigint,city_id bigint,district_id bigint,order_timelines bigint," +
+                "passenger_id bigint,driver_id bigint,listen_model bigint,listen_dis decimal(38,6),car_level bigint,status bigint,join_model bigint,bonus decimal(38,6)," +
+                "dynamic_price decimal(38,6),dynamic_times bigint,eta bigint,walk_eta bigint,broad_num bigint,traffic_type bigint,lumian_dis decimal(38,6)," +
+                "order_wait_time bigint,is_assign_driver bigint,booking_assign bigint,broad_type bigint,is_online bigint,start_dest_distance decimal(38,6),distance decimal(38,6)," +
+                "broad_time string,day smallint,hour smallint) PARTITIONED BY (year smallint,month tinyint) STORED AS PARQUET; "));
+    }
+
+}
 

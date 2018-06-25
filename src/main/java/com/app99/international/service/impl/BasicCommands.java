@@ -1,7 +1,6 @@
 package com.app99.international.service.impl;
 
 import com.app99.international.integration.impl.HiveMetastoreDAOImpl;
-import com.app99.international.integration.impl.ImpalaDAOImpl;
 import com.app99.international.integration.impl.RedshiftDAOImpl;
 import com.app99.international.model.Field;
 import com.app99.international.model.OptionField;
@@ -19,10 +18,10 @@ public abstract class BasicCommands{
 
     @Autowired
     private HiveMetastoreDAOImpl catalog;
-
+/*
     @Autowired
     private ImpalaDAOImpl impalaD;
-
+*/
     @Autowired
     private RedshiftDAOImpl redshift;
 
@@ -35,11 +34,11 @@ public abstract class BasicCommands{
     public HiveMetastoreDAOImpl getCatalog() {
         return catalog;
     }
-
+/*
     public ImpalaDAOImpl getImpalaD() {
         return impalaD;
     }
-
+*/
     public RedshiftDAOImpl getRedshift() {
         return redshift;
     }
@@ -49,21 +48,25 @@ public abstract class BasicCommands{
     }
 
     protected boolean hasPartitions(String database, String tableName) throws Exception {
-        return catalog.getFieldsPartitions(database, tableName).size() != 0 ? true : false;
+        return (database.equals(BACKFILL)) ? true : catalog.getFieldsPartitions(database, tableName).size() != 0 ? true : false;
     }
 
 
     protected String getPartitions(String separator, String database, String tableName) throws Exception {
-        return getPartitions(separator, database, tableName, null, OptionField.DEFAULT);
+        String partitions = getPartitions(separator, database, tableName, null, OptionField.DEFAULT);
+        return (partitions.length() == 0)  ? getPartitions(separator, tableName, null, catalog.getFieldsPartitionsFile(tableName), OptionField.DEFAULT): partitions;
     }
     protected String getPartitions(String separator, String database, String tableName, String[] values, OptionField optionShowField) throws Exception {
+        return getPartitions(separator, tableName, values, catalog.getFieldsPartitions(database, tableName), optionShowField);
+    }
+
+    protected String getPartitions(String separator, String tableName, String[] values, List<Field> fields, OptionField optionShowField) throws Exception{
         StringBuffer command = new StringBuffer();
-        List<Field> fields = catalog.getFieldsPartitions(database, tableName);
 
         int size = fields.size();
         for (int i = 0; i < fields.size(); i++) {
 
-            switch (optionShowField){
+            switch (optionShowField) {
                 case ONLY_FIELDS:
                     command.append(values[i]);
                     break;
@@ -77,12 +80,14 @@ public abstract class BasicCommands{
                     command.append(fields.get(i).toParquet(tableName));
             }
 
-            if (--size != 0){
+            if (--size != 0) {
                 command.append(separator);
             }
         }
         return command.toString();
     }
+
+
 
     protected String getParameters() {
         return "SET compression_codec=snappy; SET parquet_file_size=256mb; ";

@@ -5,6 +5,7 @@ import com.app99.international.model.OptionField;
 import com.app99.international.service.ImpalaService;
 import org.springframework.stereotype.Service;
 
+import java.security.acl.LastOwnerException;
 import java.util.List;
 
 
@@ -57,17 +58,16 @@ public class ImpalaServiceImpl extends BasicCommands implements ImpalaService{
 
         command.append("INSERT INTO " + database + "." + tableName + " ");
 
-        if(hasPartitions){
+        if(hasPartitions && partitions.length() > 0){
             command.append("PARTITION (" + partitions +  ") ");
         }
 
         return command.toString();
     }
 
-    protected String createSelectCommand(String selectDatabase, String fromDatabase, String tableName, String partitions, boolean hasPartitions)throws Exception{
+    protected String createSelectCommand(String selectDatabase, String fromDatabase, String tableName, String partitions, boolean hasPartitions) throws Exception {
         return createSelectCommand(selectDatabase, fromDatabase, tableName, partitions, hasPartitions, false);
     }
-
     protected String createSelectCommand(String selectDatabase, String fromDatabase, String tableName, String partitions, boolean hasPartitions, boolean backfill) throws Exception {
         StringBuffer command = new StringBuffer();
         command.append("SELECT ");
@@ -75,7 +75,7 @@ public class ImpalaServiceImpl extends BasicCommands implements ImpalaService{
         if(tableName.startsWith("dim_")){
             command.append("DISTINCT ");
         }
-        if(hasPartitions || backfill){
+        if(hasPartitions){
             command.append(getFieldsOrderByPartitions(selectDatabase, tableName, true));
             String sql = getPartitions(",", selectDatabase, tableName).trim();
             if(sql.length() > 0){
@@ -86,7 +86,7 @@ public class ImpalaServiceImpl extends BasicCommands implements ImpalaService{
         }
         command.append(" FROM " + fromDatabase + "." + tableName + " ");
 
-        if(hasPartitions) {
+        if(hasPartitions && !(backfill)) {
             command.append("WHERE " + partitions);
         }
 
@@ -101,14 +101,14 @@ public class ImpalaServiceImpl extends BasicCommands implements ImpalaService{
 
         command.append(createTable(NEW_APP, tableName, false, existTable(REDSHIFT, tableName, false)));
         command.append(createInsertCommand(NEW_APP, tableName, getPartitionsImpalaNewApp(tableName), hasPartitions(BACKFILL, tableName)));
-        command.append(createSelectCommand(NEW_APP,BACKFILL, tableName, " ", false, true));
+        command.append(createSelectCommand(NEW_APP,BACKFILL, tableName, " ", hasPartitions(BACKFILL, tableName), true));
 
         return command.toString();
     }
 
     @Override
     public boolean executeQuery(String command) throws Exception{
-        return getImpalaD().executeQuery(command);
+        return true;//getImpalaD().executeQuery(command);
     }
 
     protected String getPartitionsImpalaRedShift(String tableName, String[] values) throws Exception {
@@ -116,7 +116,8 @@ public class ImpalaServiceImpl extends BasicCommands implements ImpalaService{
     }
 
     protected String getPartitionsImpalaNewApp(String tableName) throws Exception{
-        return getPartitions(",", NEW_APP, tableName, new String[] {}, OptionField.ONLY_VALUES);
+        String partitions = getPartitions(",", NEW_APP, tableName, new String[] {}, OptionField.ONLY_VALUES);
+        return (partitions.length() == 0 ) ? getPartitions(",", tableName, new String[] {}, getCatalog().getFieldsPartitionsFile(tableName), OptionField.ONLY_VALUES): partitions;
     }
 
 
@@ -124,7 +125,7 @@ public class ImpalaServiceImpl extends BasicCommands implements ImpalaService{
     @Override
     public  String AddPartitionsS3(String oldDatabase, String tableName, String[] values) throws Exception {
         StringBuffer partition = new StringBuffer("ALTER TABLE " + oldDatabase + "." + tableName + " ADD PARTITION(" + getPartitions(",", oldDatabase, tableName, values, OptionField.FIELD_EQUAL_VALUE) + ") ");
-        partition.append("LOCATION 's3a://99taxis-dw-international-online/hive-export/international/" + tableName + "/" + getPartitions("/", oldDatabase, tableName, values, OptionField.ONLY_FIELDS) + "/'; ");
+        partition.append(("LOCATION 's3a://99taxis-dw-international-online/hive-export/international/" + tableName + "/" + getPartitions("/", oldDatabase, tableName, values, OptionField.ONLY_FIELDS) + "/'; ").replace("//", "/"));
         partition.append("COMPUTE INCREMENTAL STATS " + oldDatabase + "." + tableName + " PARTITION(" + getPartitions(",", oldDatabase, tableName, values, OptionField.FIELD_EQUAL_VALUE) + ");");
 
 
@@ -132,7 +133,11 @@ public class ImpalaServiceImpl extends BasicCommands implements ImpalaService{
 
         List<Field> fields = existTable(REDSHIFT, tableName, false, false);
         if(fields.size() == 0){
-            partition.append(createTable(oldDatabase, tableName, true, existTable(NEW_APP, tableName, true)));
+            if(oldDatabase.equals(REDSHIFT)){
+                partition.append(createTable(oldDatabase, tableName, true, existTable(NEW_APP, tableName, true)));
+            }else {
+                partition.append(createTable(oldDatabase, tableName, true, existTable(REDSHIFT, tableName, false)));
+            }
         }
         return partition.toString();
     }

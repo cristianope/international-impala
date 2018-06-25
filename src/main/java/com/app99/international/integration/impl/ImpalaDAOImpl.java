@@ -30,7 +30,6 @@ public class ImpalaDAOImpl  extends JdbcDaoSupport implements ImpalaDAO {
 
     @Override
     public boolean executeQuery(String sql) throws Exception {
-
         String[] queries = sql.trim().split(";");
 
         Connection conn = null;

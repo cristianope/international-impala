@@ -35,24 +35,23 @@ public class SQSListener implements MessageListener {
                 LOGGER.info("Received message " + textMessage.getText());
 
                 String[] token = fileKey.split("/");
+                String tableName = token[2];
 
-                if(token[1].equals("backfill")){
-                    String tableName = fileKey.split(":")[3];
-                    impalaService.backfillTable(tableName);
-
+                if (tableName.equals("backfill")){
+                    impalaService.executeQuery(impalaService.backfillTable(token[3]));
                 }else {
-                    String tableName = token[2];
                     String year   = token[3];
                     String month  = token[4];
                     String day    = token[5];
                     String hour   = token[6];
-                    if(impalaService.executeQuery(impalaService.AddPartitionsS3("redshift.", tableName, new String[]{year, month, day, hour}))) {
+
+                    LOGGER.info("==================================== " + tableName);
+                    if(impalaService.executeQuery(impalaService.AddPartitionsS3("redshift", tableName, new String[]{year, month, day, hour}))) {
                         impalaService.executeQuery(impalaService.prepareCommand("redshift", "new_app", tableName, year, month, day, hour));
                     } else {
                         LOGGER.info("Table: " + tableName + " - ERROR When was add a new partition " + fileKey);
                     }
                 }
-
             } else {
                 LOGGER.info("The message received was not processed because it is not a processable gz file. " + textMessage.getText());
             }

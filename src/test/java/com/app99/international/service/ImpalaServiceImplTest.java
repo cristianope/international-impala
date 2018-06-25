@@ -1,4 +1,4 @@
-/*package com.app99.international.service;
+package com.app99.international.service;
 
 
 import com.app99.international.application.Application;
@@ -30,21 +30,23 @@ public class ImpalaServiceImplTest extends ImpalaServiceImpl {
     private static final String NEW_APP = "new_app";
     private static final String REDSHIFT = "redshift";
     private static final String APP_COUPON = "app_coupon_base_bra_cube_d";
-    private static final String DWD_ORDER_PAY =  "dwd_order_pay_success_hi";
-
-
+    private static final String DWD_ORDER_PAY = "dwd_order_pay_success_hi";
+    private static final String DM_MARKET = "dm_market_message_send_cube_hd";
 
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BasicCommands.class);
-/*
+
 
     @Test
     public void createInsertCommand() throws Exception {
         String ddl = createInsertCommand(NEW_APP, DIM_CITY, getPartitionsImpalaNewApp(DIM_CITY), true);
-        assertTrue(ddl.contains("SET compression_codec=snappy; SET parquet_file_size=256mb; INSERT INTO new_app.dim_city PARTITION () "));
+        assertTrue(ddl.contains("SET compression_codec=snappy; SET parquet_file_size=256mb; INSERT INTO new_app.dim_city"));
 
         ddl = createInsertCommand(NEW_APP, DIM_CITY, getPartitionsImpalaNewApp(DIM_CITY), false);
         assertTrue(ddl.contains("INSERT INTO new_app.dim_city"));
+
+        ddl = createInsertCommand(NEW_APP, DM_MARKET, getPartitionsImpalaNewApp(DM_MARKET), true);
+        assertTrue(ddl.contains("INSERT INTO new_app.dm_market_message_send_cube_hd PARTITION (year)"));
     }
 
     @Test
@@ -120,7 +122,7 @@ public class ImpalaServiceImplTest extends ImpalaServiceImpl {
                 "new_app.dwd_order_pay_success_hi PARTITION(year=2018,month=05,day=05,hour=10); "));
     }
 
-*
+
     @Test
     public void executeCommandDDL() throws Exception {
        assertFalse(service.executeQuery("SET compression_codec=snappy; SET parquet_file_size=256mb; "));
@@ -131,4 +133,3 @@ public class ImpalaServiceImplTest extends ImpalaServiceImpl {
         assertTrue(service.executeQuery("SELECT 1;"));
     }
 }
-*/

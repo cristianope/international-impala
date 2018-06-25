@@ -51,7 +51,13 @@ public class HiveMetastoreDAOImpl extends JdbcDaoSupport implements HiveMetastor
 
         fields.addAll(partitions);
 
-
+        if (fields.size() == 0) {
+            fields = getFields("redshift", tableName);
+            partitions = getFieldsPartitions("redshift", tableName);
+            partitions2 = getFieldsPartitionsFile(tableName);
+            partitions.removeAll(partitions2);
+            fields.addAll(partitions);
+        }
 
         return fields;
     }
@@ -127,15 +133,15 @@ public class HiveMetastoreDAOImpl extends JdbcDaoSupport implements HiveMetastor
             }
             rs.close();
             ps.close();
-            return fields;
         } catch (SQLException e) {
             throw new RuntimeException(e);
         } finally {
             if (conn != null) {
                 try {
                     conn.close();
-                } catch (SQLException e) {}
+                } catch (SQLException e) { throw new RuntimeException(e);}
             }
+            return fields;
         }
     }
 }
