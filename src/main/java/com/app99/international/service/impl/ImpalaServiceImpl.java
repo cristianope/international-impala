@@ -108,7 +108,7 @@ public class ImpalaServiceImpl extends BasicCommands implements ImpalaService{
 
     @Override
     public boolean executeQuery(String command) throws Exception{
-        return true;//getImpalaD().executeQuery(command);
+        return getImpalaD().executeQuery(command);
     }
 
     protected String getPartitionsImpalaRedShift(String tableName, String[] values) throws Exception {

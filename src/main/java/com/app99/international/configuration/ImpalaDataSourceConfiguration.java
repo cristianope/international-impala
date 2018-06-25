@@ -18,7 +18,7 @@ public class ImpalaDataSourceConfiguration {
     public DriverManagerDataSource impalaPoolingDataSource() {
         DriverManagerDataSource ds = new DriverManagerDataSource();
         ds.setDriverClassName(DRIVER);
-//      ds.setUrl("jdbc:impala://127.0.0.1:21051/new_app;");
+//      ds.setUrl("jdbc:impala://127.0.0.1:21051/new_app;UseNativeQuery=1;");
         ds.setUrl(impalaUrl);
         return ds;
 

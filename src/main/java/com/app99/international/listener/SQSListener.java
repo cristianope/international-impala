@@ -12,6 +12,9 @@ import org.springframework.stereotype.Component;
 import javax.jms.Message;
 import javax.jms.MessageListener;
 import javax.jms.TextMessage;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 @Component
 public class SQSListener implements MessageListener {
@@ -47,7 +50,18 @@ public class SQSListener implements MessageListener {
 
                     LOGGER.info("==================================== " + tableName);
                     if(impalaService.executeQuery(impalaService.AddPartitionsS3("redshift", tableName, new String[]{year, month, day, hour}))) {
-                        impalaService.executeQuery(impalaService.prepareCommand("redshift", "new_app", tableName, year, month, day, hour));
+                        String dateStart= "01-07-2018";
+                        SimpleDateFormat f = new SimpleDateFormat("dd-MM-yyyy");
+
+                        try {
+                            Date d = f.parse(dateStart);
+                            if(System.currentTimeMillis() >= d.getTime()){
+                                LOGGER.info("the date is not valid.");
+                                impalaService.executeQuery(impalaService.prepareCommand("redshift", "new_app", tableName, year, month, day, hour));
+                            }
+                        } catch (ParseException e) {
+                            LOGGER.error("the date is not valid.");
+                        }
                     } else {
                         LOGGER.info("Table: " + tableName + " - ERROR When was add a new partition " + fileKey);
                     }

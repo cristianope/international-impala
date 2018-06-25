@@ -90,7 +90,7 @@ public class BasicCommandsTest extends BasicCommands{
     @Test
     public void hasPartitions() throws Exception {
         assertTrue(hasPartitions(REDSHIFT, DIM_CITY));
-        assertFalse(hasPartitions("backfill", DIM_CITY));
+        assertTrue(hasPartitions("backfill", DIM_CITY));
     }
 
 

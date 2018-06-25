@@ -1,6 +1,7 @@
 package com.app99.international.service.impl;
 
 import com.app99.international.integration.impl.HiveMetastoreDAOImpl;
+import com.app99.international.integration.impl.ImpalaDAOImpl;
 import com.app99.international.integration.impl.RedshiftDAOImpl;
 import com.app99.international.model.Field;
 import com.app99.international.model.OptionField;
@@ -18,10 +19,10 @@ public abstract class BasicCommands{
 
     @Autowired
     private HiveMetastoreDAOImpl catalog;
-/*
+
     @Autowired
     private ImpalaDAOImpl impalaD;
-*/
+
     @Autowired
     private RedshiftDAOImpl redshift;
 
@@ -34,11 +35,11 @@ public abstract class BasicCommands{
     public HiveMetastoreDAOImpl getCatalog() {
         return catalog;
     }
-/*
+
     public ImpalaDAOImpl getImpalaD() {
         return impalaD;
     }
-*/
+
     public RedshiftDAOImpl getRedshift() {
         return redshift;
     }

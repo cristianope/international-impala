@@ -77,17 +77,17 @@ public class ImpalaServiceImplTest extends ImpalaServiceImpl {
     @Test
     public void AddPartitionsS3DayPartition() throws Exception {
         String ddl = service.AddPartitionsS3(REDSHIFT, APP_COUPON, new String[] {"2018", "05", "05", null});
-        assertTrue(ddl.contains("ALTER TABLE redshift.app_coupon_base_bra_cube_d ADD PARTITION(year=2018,month=05,day=05) " +
-                "LOCATION 's3a://99taxis-dw-international-online/hive-export/international/app_coupon_base_bra_cube_d/2018/05/05/';" +
-                " COMPUTE INCREMENTAL STATS redshift.app_coupon_base_bra_cube_d PARTITION(year=2018,month=05,day=05);"));
+        assertTrue(ddl.contains("ALTER TABLE redshift.app_coupon_base_bra_cube_d ADD PARTITION(year=2018,month=05,day=05) LOCATION " +
+                "'s3a:/99taxis-dw-international-online/hive-export/international/app_coupon_base_bra_cube_d/2018/05/05/'; " +
+                "COMPUTE INCREMENTAL STATS redshift.app_coupon_base_bra_cube_d PARTITION(year=2018,month=05,day=05);"));
     }
 
     @Test
     public void AddPartitionsS3() throws Exception {
         String ddl = service.AddPartitionsS3(REDSHIFT, DWD_ORDER_PAY , new String[]{"2018", "05", "05", "10"});
         assertTrue(ddl.contains("ALTER TABLE redshift.dwd_order_pay_success_hi ADD PARTITION(year=2018,month=05,day=05,hour=10) " +
-                "LOCATION 's3a://99taxis-dw-international-online/hive-export/international/dwd_order_pay_success_hi/2018/05/05/10/';" +
-                " COMPUTE INCREMENTAL STATS redshift.dwd_order_pay_success_hi PARTITION(year=2018,month=05,day=05,hour=10);"));
+                "LOCATION 's3a:/99taxis-dw-international-online/hive-export/international/dwd_order_pay_success_hi/2018/05/05/10/'; " +
+                "COMPUTE INCREMENTAL STATS redshift.dwd_order_pay_success_hi PARTITION(year=2018,month=05,day=05,hour=10);"));
     }
 
 
@@ -100,12 +100,12 @@ public class ImpalaServiceImplTest extends ImpalaServiceImpl {
                 "product_id bigint,passenger_id bigint,driver_id bigint,payable_cost decimal(38,6),actual_cost decimal(38,6)," +
                 "is_use_coupon bigint,coupon_spend decimal(38,6),pay_info string,country_code string,day smallint,hour smallint) " +
                 "PARTITIONED BY (year smallint,month tinyint) STORED AS PARQUET; SET compression_codec=snappy; SET parquet_file_size=256mb;" +
-                " INSERT INTO new_app.dwd_order_pay_success_hi SELECT  CAST(timezone AS bigint) , CAST(country_id AS bigint) ," +
-                " CAST(stat_date AS timestamp) , CAST(stat_hour AS string) , CAST(current_stat_date AS timestamp) ," +
-                " CAST(current_stat_hour AS string) , CAST(order_id AS bigint) , CAST(city_id AS bigint) , CAST(product_id AS bigint) ," +
-                " CAST(passenger_id AS bigint) , CAST(driver_id AS bigint) , CAST(payable_cost AS decimal(38,6)) , CAST(actual_cost AS decimal(38,6)) ," +
-                " CAST(is_use_coupon AS bigint) , CAST(coupon_spend AS decimal(38,6)) , CAST(pay_info AS string) , CAST(country_code AS string) ," +
-                " CAST(day AS tinyint) , CAST(hour AS tinyint) , CAST(year AS smallint) , CAST(month AS tinyint) FROM backfill.dwd_order_pay_success_hi ; "));
+                " INSERT INTO new_app.dwd_order_pay_success_hi PARTITION (year,month) SELECT  CAST(timezone AS bigint) , CAST(country_id AS bigint) ," +
+                " CAST(stat_date AS timestamp) , CAST(stat_hour AS string) , CAST(current_stat_date AS timestamp) , CAST(current_stat_hour AS string) ," +
+                " CAST(order_id AS bigint) , CAST(city_id AS bigint) , CAST(product_id AS bigint) , CAST(passenger_id AS bigint) , CAST(driver_id AS bigint) ," +
+                " CAST(payable_cost AS decimal(38,6)) , CAST(actual_cost AS decimal(38,6)) , CAST(is_use_coupon AS bigint) , CAST(coupon_spend AS decimal(38,6)) ," +
+                " CAST(pay_info AS string) , CAST(country_code AS string) , CAST(day AS tinyint) , CAST(hour AS tinyint) , CAST(year AS smallint) ," +
+                " CAST(month AS tinyint) FROM backfill.dwd_order_pay_success_hi ;"));
     }
 
 

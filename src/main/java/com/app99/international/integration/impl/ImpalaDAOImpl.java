@@ -39,8 +39,17 @@ public class ImpalaDAOImpl  extends JdbcDaoSupport implements ImpalaDAO {
             conn = impalaPoolingDataSource.getConnection();
             Statement ps = conn.createStatement();
             for(String query: queries){
-                result = ps.execute(query + ";");
-                LOGGER.info("executeQuery ===================== SQL - Result: " + query + " - " + result);
+                if(conn.isValid(5000)) {
+                    LOGGER.info("executeQuery ===================== SQL: " + query );
+                    if(query.contains("CREATE") || query.contains("SET") || query.contains("ALTER")){
+                        conn.nativeSQL(query);
+                    }else{
+                        result = ps.execute(query + ";");
+                    }
+                }else{
+                    LOGGER.warn("executeQuery ===================== SQL - Reopen Connection");
+                    conn = impalaPoolingDataSource.getConnection();
+                }
             }
             ps.close();
             return result;
