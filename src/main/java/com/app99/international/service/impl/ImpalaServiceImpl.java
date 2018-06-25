@@ -5,7 +5,6 @@ import com.app99.international.model.OptionField;
 import com.app99.international.service.ImpalaService;
 import org.springframework.stereotype.Service;
 
-import java.security.acl.LastOwnerException;
 import java.util.List;
 
 
@@ -108,8 +107,13 @@ public class ImpalaServiceImpl extends BasicCommands implements ImpalaService{
 
     @Override
     public boolean executeQuery(String command) throws Exception{
-        return getImpalaD().executeQuery(command);
+        boolean result = true;
+        for(Boolean bool : getImpalaD().executeQuery(command)){
+            result = (result && bool);
+        }
+        return result;
     }
+
 
     protected String getPartitionsImpalaRedShift(String tableName, String[] values) throws Exception {
         return getPartitions(" AND ", REDSHIFT, tableName, values, OptionField.FIELD_EQUAL_VALUE);

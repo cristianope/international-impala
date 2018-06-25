@@ -1,8 +1,10 @@
 package com.app99.international.integration;
 
+import java.util.List;
+
 public interface ImpalaDAO  extends DAO{
 
 
-   boolean executeQuery(String sql) throws Exception;
+   List<Boolean> executeQuery(String sql) throws Exception;
 
 }

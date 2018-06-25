@@ -21,7 +21,6 @@ import static org.junit.Assert.assertTrue;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = Application.class)
 @ContextConfiguration
-
 public class ImpalaDAOTest extends EnvironmentVariable {
 
     @Rule
@@ -30,23 +29,36 @@ public class ImpalaDAOTest extends EnvironmentVariable {
     @Autowired
     private ImpalaDAOImpl impala;
 
+      @Test
+    public void executeCommandDDLTable() throws Exception {
+        for(Boolean bool: impala.executeQuery("CREATE TABLE IF NOT EXISTS default.teste(id bigint) STORED AS PARQUET;")){
+            assertTrue(bool);
+        }
+    }
+
     @Test
     public void executeCommandDDL() throws Exception {
-        assertFalse(impala.executeQuery("SET compression_codec=snappy; SET parquet_file_size=256mb; "));
+        for(Boolean bool: impala.executeQuery("SET compression_codec=snappy; SET parquet_file_size=256mb; ")){
+            assertTrue(bool);
+        }
+    }
+
+    @Test
+    public void executeCommandDDLWrong() throws Exception {
+        expectedEx.expect(SQLException.class);
+        for (Boolean bool : impala.executeQuery("SET compression_codec=coisa_sem_sentido; SET parquet_file_size=sei_la; ")) {
+            assertFalse(bool);
+        }
     }
 
     @Test
     public void executeCommandDQL() throws Exception {
-        assertTrue(impala.executeQuery("SELECT * FROM new_app.dim_city; SELECT * FROM redshift.dim_city;"));
+        assertTrue(impala.executeQuery("SELECT * FROM default.teste2;").get(0));
     }
 
     @Test
     public void executeCommandDQLTableNotExist() throws Exception {
         expectedEx.expect(SQLException.class);
-        expectedEx.expectMessage("[Simba][ImpalaJDBCDriver](500051) ERROR processing query/statement. " +
-                "Error Code: 0, SQL state: TStatus(statusCode:ERROR_STATUS, sqlState:HY000, errorMessage:AnalysisException: " +
-                "Could not resolve table reference: 'new_app.table_not_exist'\n" +
-                "), Query: SELECT * FROM new_app.table_not_exist;.");
-        assertFalse(impala.executeQuery("SELECT * FROM new_app.table_not_exist; "));
+        assertFalse(impala.executeQuery("SELECT * FROM new_app.table_not_exist; ").get(0));
     }
 }
