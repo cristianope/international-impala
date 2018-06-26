@@ -2,7 +2,7 @@ package com.app99.international.integration.impl;
 
 import com.app99.international.integration.HiveMetastoreDAO;
 import com.app99.international.model.Field;
-import com.app99.international.model.ReadFile;
+import com.app99.international.model.Functions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,7 +70,7 @@ public class HiveMetastoreDAOImpl extends JdbcDaoSupport implements HiveMetastor
 
     @Override
     public List<Field> getFieldsPartitionsFile(String tableName) throws Exception {
-        List<String> linhas = new ReadFile().getFile("tables_partitions");
+        List<String> linhas = Functions.getFile("tables_partitions");
         List<Field> fields = new ArrayList<Field>();
 
         for (String linha : linhas){
@@ -96,7 +96,7 @@ public class HiveMetastoreDAOImpl extends JdbcDaoSupport implements HiveMetastor
 
     @Override
     public boolean isFullPartition(String tableName) {
-        List<String> tables = new ReadFile().getFile("tables_full_partition");
+        List<String> tables = Functions.getFile("tables_full_partition");
 
         for (String table:tables) {
             if (tableName.equals(table)){

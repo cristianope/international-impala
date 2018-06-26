@@ -14,7 +14,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
 
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(SpringRunner.class)
@@ -35,7 +34,6 @@ public class ImpalaServiceImplTest extends ImpalaServiceImpl {
 
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BasicCommands.class);
-
 
     @Test
     public void createInsertCommand() throws Exception {
@@ -73,21 +71,30 @@ public class ImpalaServiceImplTest extends ImpalaServiceImpl {
     }
 
 
-
     @Test
     public void AddPartitionsS3DayPartition() throws Exception {
         String ddl = service.AddPartitionsS3(REDSHIFT, APP_COUPON, new String[] {"2018", "05", "05", null});
-        assertTrue(ddl.contains("ALTER TABLE redshift.app_coupon_base_bra_cube_d ADD PARTITION(year=2018,month=05,day=05) LOCATION " +
-                "'s3a:/99taxis-dw-international-online/hive-export/international/app_coupon_base_bra_cube_d/2018/05/05/'; " +
+        assertTrue(ddl.contains("ALTER TABLE redshift.app_coupon_base_bra_cube_d ADD IF NOT EXISTS PARTITION(year=2018,month=05,day=05)" +
+                " LOCATION 's3a://99taxis-dw-international-online/hive-export/international/app_coupon_base_bra_cube_d/2018/05/05/'; " +
                 "COMPUTE INCREMENTAL STATS redshift.app_coupon_base_bra_cube_d PARTITION(year=2018,month=05,day=05);"));
     }
 
     @Test
     public void AddPartitionsS3() throws Exception {
         String ddl = service.AddPartitionsS3(REDSHIFT, DWD_ORDER_PAY , new String[]{"2018", "05", "05", "10"});
-        assertTrue(ddl.contains("ALTER TABLE redshift.dwd_order_pay_success_hi ADD PARTITION(year=2018,month=05,day=05,hour=10) " +
-                "LOCATION 's3a:/99taxis-dw-international-online/hive-export/international/dwd_order_pay_success_hi/2018/05/05/10/'; " +
+        assertTrue(ddl.contains("ALTER TABLE redshift.dwd_order_pay_success_hi ADD IF NOT EXISTS PARTITION(year=2018,month=05,day=05,hour=10) " +
+                "LOCATION 's3a://99taxis-dw-international-online/hive-export/international/dwd_order_pay_success_hi/2018/05/05/10/'; " +
                 "COMPUTE INCREMENTAL STATS redshift.dwd_order_pay_success_hi PARTITION(year=2018,month=05,day=05,hour=10);"));
+
+
+    }
+
+    @Test
+    public void AddPartitionsS3OtherTable() throws Exception {
+        String ddl = service.AddPartitionsS3(REDSHIFT, "dim_car_base" , new String[]{"2018", "06", "26", "02"});
+        assertTrue(ddl.contains("ALTER TABLE redshift.dim_car_base ADD IF NOT EXISTS PARTITION(year=2018,month=06,day=26,hour=02) " +
+                "LOCATION 's3a://99taxis-dw-international-online/hive-export/international/dim_car_base/2018/06/26/02/'; " +
+                "COMPUTE INCREMENTAL STATS redshift.dim_car_base PARTITION(year=2018,month=06,day=26,hour=02);"));
     }
 
 
@@ -125,7 +132,7 @@ public class ImpalaServiceImplTest extends ImpalaServiceImpl {
 
     @Test
     public void executeCommandDDL() throws Exception {
-       assertFalse(service.executeQuery("SET compression_codec=snappy; SET parquet_file_size=256mb; "));
+       assertTrue(service.executeQuery("SET compression_codec=snappy; SET parquet_file_size=256mb; "));
     }
 
     @Test

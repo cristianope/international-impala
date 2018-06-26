@@ -1,6 +1,7 @@
 package com.app99.international.listener;
 
 import com.amazonaws.services.s3.model.AmazonS3Exception;
+import com.app99.international.model.Functions;
 import com.app99.international.service.ImpalaService;
 import com.jayway.jsonpath.JsonPath;
 import org.slf4j.Logger;
@@ -27,6 +28,8 @@ public class SQSListener implements MessageListener {
     @Autowired
     private JmsTemplate jmsTemplate;
 
+
+
     public void onMessage(Message message) {
         TextMessage textMessage = (TextMessage) message;
         try {
@@ -48,33 +51,26 @@ public class SQSListener implements MessageListener {
                     String day    = token[5];
                     String hour   = token[6];
 
-                    LOGGER.info("==================================== " + tableName);
+                    LOGGER.info("===================================== " + tableName);
                     if(impalaService.executeQuery(impalaService.AddPartitionsS3("redshift", tableName, new String[]{year, month, day, hour}))) {
-                        String dateStart= "01-07-2018";
-                        SimpleDateFormat f = new SimpleDateFormat("dd-MM-yyyy");
-
-                        try {
-                            Date d = f.parse(dateStart);
-                            if(System.currentTimeMillis() >= d.getTime()){
-                                LOGGER.info("the date is not valid.");
-                                impalaService.executeQuery(impalaService.prepareCommand("redshift", "new_app", tableName, year, month, day, hour));
-                            }
-                        } catch (ParseException e) {
-                            LOGGER.error("the date is not valid.");
+                        if(Functions.startJob(day + "-" + month + "-" + year)){
+                            impalaService.executeQuery(impalaService.prepareCommand("redshift", "new_app", tableName, year, month, day, hour));
                         }
                     } else {
-                        LOGGER.info("Table: " + tableName + " - ERROR When was add a new partition " + fileKey);
+                        LOGGER.warn("Table: " + tableName + " - ERROR When was add a new partition " + fileKey);
                     }
                 }
             } else {
-                LOGGER.info("The message received was not processed because it is not a processable gz file. " + textMessage.getText());
+                LOGGER.warn("The message received was not processed because it is not a processable gz file. " + textMessage.getText());
             }
         } catch (AmazonS3Exception ae) {
             if (ae.getErrorCode().equals("NoSuchKey") && ae.getErrorResponseXml().contains("hive-export/queries/rides")) {
                 LOGGER.error("NoSuchKey Exception processing the files. Sending message to the queue again to wait for the ride file");
                 jmsTemplate.convertAndSend(message);
             }
-        } catch (Exception e) {
+        } catch(ParseException pe){
+            LOGGER.warn("Invalid date. " + pe.getMessage());
+        }catch (Exception e) {
             LOGGER.error("Unknown error processing message, ignoring message. " + e.getMessage());
         }
     }

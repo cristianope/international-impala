@@ -31,8 +31,22 @@ public class ImpalaDAOImpl  extends JdbcDaoSupport implements ImpalaDAO {
     private static final Logger LOGGER = LoggerFactory.getLogger(ImpalaDAOImpl.class);
 
 
+    private boolean runQuery(String query, Statement ps) throws SQLException {
+        if(query.contains("INSERT") || query.contains("ALTER") || query.contains("CREATE") || query.contains("SET")) {
+            if (query.contains("INSERT")) {
+                return (ps.executeUpdate(query + ";") > 0) ;
+            } else {
+                return !(ps.executeUpdate(query + ";") == 0);
+            }
+        }else {
+            ResultSet rs = ps.executeQuery(query + ";");
+            return (rs.next());
+        }
+    }
+
+
     @Override
-    public List<Boolean> executeQuery(String sql) throws Exception {
+    public List<Boolean> executeQuery(String sql) throws SQLException {
         String[] queries = sql.trim().split(";");
         List<Boolean> results = new ArrayList<>();
 
@@ -42,36 +56,27 @@ public class ImpalaDAOImpl  extends JdbcDaoSupport implements ImpalaDAO {
             LOGGER.info("executeQuery ===================== SQL FULL: " + sql );
             conn = impalaPoolingDataSource.getConnection();
             Statement ps = conn.createStatement();
+
             for(String query: queries){
                 if(conn.isValid(5000)) {
-                    LOGGER.info("executeQuery ===================== SQL: " + query );
-                    if(query.contains("INSERT") || query.contains("ALTER") || query.contains("COMPUTE") || query.contains("CREATE") || query.contains("SET")){
-                        LOGGER.info("executeQuery ===================== DDL - Definition" );
-                            if(query.contains("INSERT")){
-                                results.add((ps.executeUpdate(query) > 0));
-                            }else {
-                                results.add(!(ps.executeUpdate(query) == 0));
-                            }
-                    }else {
-                        LOGGER.info("executeQuery ===================== DQL - Query" );
-                        ResultSet rs = ps.executeQuery(query + ";");
-                        results.add(rs.next());
-                    }
-                }else{
+                    results.add(runQuery(query, ps));
+                }else {
                     LOGGER.warn("executeQuery ===================== SQL - Reopen Connection");
                     conn = impalaPoolingDataSource.getConnection();
+                    ps = conn.createStatement();
+                    results.add(runQuery(query, ps));
                 }
             }
             ps.close();
             return results;
         } catch (SQLException e) {
-            LOGGER.info("executeQuery ======================== Exception: " + e.getMessage());
-            throw new Exception(e);
+            LOGGER.warn("executeQuery ======================== Exception: " + e.getMessage());
+            throw new SQLException(e);
         } finally {
             if (conn != null) {
                 try {
                     conn.close();
-                } catch (SQLException e) {}
+                } catch (SQLException e) { throw new SQLException(e);}
             }
         }
     }

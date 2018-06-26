@@ -128,8 +128,8 @@ public class ImpalaServiceImpl extends BasicCommands implements ImpalaService{
 
     @Override
     public  String AddPartitionsS3(String oldDatabase, String tableName, String[] values) throws Exception {
-        StringBuffer partition = new StringBuffer("ALTER TABLE " + oldDatabase + "." + tableName + " ADD PARTITION(" + getPartitions(",", oldDatabase, tableName, values, OptionField.FIELD_EQUAL_VALUE) + ") ");
-        partition.append(("LOCATION 's3a://99taxis-dw-international-online/hive-export/international/" + tableName + "/" + getPartitions("/", oldDatabase, tableName, values, OptionField.ONLY_FIELDS) + "/'; ").replace("//", "/"));
+        StringBuffer partition = new StringBuffer("ALTER TABLE " + oldDatabase + "." + tableName + " ADD IF NOT EXISTS PARTITION(" + getPartitions(",", oldDatabase, tableName, values, OptionField.FIELD_EQUAL_VALUE) + ") ");
+        partition.append(("LOCATION 's3a://99taxis-dw-international-online/hive-export/international/" + tableName + "/" + getPartitions("/", oldDatabase, tableName, values, OptionField.ONLY_FIELDS) + "/'; ").replace("//';", "/';"));
         partition.append("COMPUTE INCREMENTAL STATS " + oldDatabase + "." + tableName + " PARTITION(" + getPartitions(",", oldDatabase, tableName, values, OptionField.FIELD_EQUAL_VALUE) + ");");
 
 

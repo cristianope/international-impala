@@ -44,7 +44,7 @@ public class Field {
     }
 
     private String changeType(String tableName) {
-        List<String> linhas = new ReadFile().getFile("tables_columns_change");
+        List<String> linhas = Functions.getFile("tables_columns_change");
 
         for (String linha : linhas){
             String[] columns = linha.split("=");
