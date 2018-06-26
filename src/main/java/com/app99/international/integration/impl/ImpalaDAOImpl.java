@@ -32,7 +32,7 @@ public class ImpalaDAOImpl  extends JdbcDaoSupport implements ImpalaDAO {
 
 
     private boolean runQuery(String query, Statement ps) throws SQLException {
-        if(query.contains("INSERT") || query.contains("ALTER") || query.contains("CREATE") || query.contains("SET")) {
+        if(query.contains("INSERT") || query.contains("ALTER") || query.contains("CREATE") || query.contains("TRUNCATE") || query.contains("SET")) {
             if (query.contains("INSERT")) {
                 return (ps.executeUpdate(query + ";") > 0) ;
             } else {

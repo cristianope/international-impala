@@ -35,7 +35,7 @@ public class ImpalaDAOTest extends EnvironmentVariable {
 
       @Test
     public void executeCommandDDLTable() throws Exception {
-        for(Boolean bool: impala.executeQuery("CREATE TABLE IF NOT EXISTS default.teste(id bigint) STORED AS PARQUET; COMPUTE STATS default.teste; ")){
+        for(Boolean bool: impala.executeQuery("CREATE TABLE IF NOT EXISTS default.teste(id bigint) STORED AS PARQUET; COMPUTE STATS default.teste; TRUNCATE default.teste;")){
             assertTrue(bool);
         }
     }
