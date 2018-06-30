@@ -157,43 +157,31 @@
             <groupId>tcliservice</groupId>
             <artifactId>tcliservice</artifactId>
             <version>1.0</version>
-            <scope>system</scope>
-            <systemPath>${basedir}/BOOT-INF/lib/TCLIServiceClient.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>thrift</groupId>
-            <artifactId>linthrift</artifactId>
+            <artifactId>libthrift</artifactId>
             <version>1.0</version>
-            <scope>system</scope>
-            <systemPath>${basedir}/BOOT-INF/lib/libthrift-0.9.0.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>libfb</groupId>
             <artifactId>fb303</artifactId>
             <version>1.0</version>
-            <scope>system</scope>
-            <systemPath>${basedir}/BOOT-INF/lib/libfb303-0.9.0.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>impala</groupId>
             <artifactId>jdbc41</artifactId>
             <version>1.0</version>
-            <scope>system</scope>
-            <systemPath>${basedir}/BOOT-INF/lib/impalaJDBC41.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>hive</groupId>
             <artifactId>metastore</artifactId>
             <version>1.0</version>
-            <scope>system</scope>
-            <systemPath>${basedir}/BOOT-INF/lib/hive_metastore.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>hive</groupId>
             <artifactId>service</artifactId>
             <version>1.0</version>
-            <scope>system</scope>
-            <systemPath>${basedir}/BOOT-INF/lib/hive_service.jar</systemPath>
         </dependency>
 
     </dependencies>
@@ -210,6 +198,13 @@
                 <configuration>
                     <executable>true</executable>
                 </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
 
